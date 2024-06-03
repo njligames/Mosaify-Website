@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Uploaded Images</title>
+  </head>
+  <body>
+    <h1>Uploaded Images</h1>
+    <ul>
+      {% for file in files %}
+      <li>
+        <img
+          src="{{ url_for('main.uploaded_file', filename=file[0]) }}"
+          alt="{{ file[0] }}"
+          style="max-width: 200px"
+        />
+        <p>{{ file[0] }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    <a href="{{ url_for('main.index') }}">Back to upload</a>
+  </body>
+</html>
