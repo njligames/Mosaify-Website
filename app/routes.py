@@ -4,6 +4,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User
+from app.models import Project
+from app.models import ProjectData
 
 from PIL import Image
 import mimetypes
@@ -79,6 +81,12 @@ def uploaded_file(filename):
     #         if mime_type:
     #             return send_file(io.BytesIO(file_data), mimetype=mime_type)
     return 'File not found', 404
+
+@main.route('/mosaify')
+@login_required
+def mosaify():
+    print(current_user.id, current_user.username)
+    return render_template('mosaify.html')
 
 @main.route('/upload', methods=['POST'])
 @login_required
