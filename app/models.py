@@ -12,10 +12,12 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
+    projects = db.relationship('Project', backref='user', lazy=True)
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    project_data = db.relationship('ProjectData', backref='project', lazy=True)
 
 class ProjectData(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

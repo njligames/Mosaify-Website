@@ -77,8 +77,6 @@
     <br />
     <a href="{{ url_for('main.home') }}">Mosaify Projects</a>
     <br />
-    <br />
-    <a href="{{ url_for('main.logout') }}">Logout</a>
 
     <script>
       let dropArea = document.getElementById('drop-area');
@@ -136,7 +134,7 @@
               body: formData
           }).then(response => {
               if (response.ok) {
-                  window.location.href = '{{ url_for('main.index') }}';
+                  window.location.href = '{{ url_for('main.mosaify') }}';
               } else {
                   alert('Error uploading files');
               }

@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from app.config import Config
+import os
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -21,5 +22,9 @@ def create_app():
 
     from app.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    # Ensure the upload folder exists
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
 
     return app

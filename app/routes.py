@@ -1,6 +1,6 @@
 # app/routes.py
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, current_app, abort, session
 from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User
@@ -9,6 +9,9 @@ from app.models import ProjectData
 
 from PIL import Image
 import mimetypes
+import io
+import os
+import uuid
 
 main = Blueprint('main', __name__)
 
@@ -61,7 +64,12 @@ def index():
 @main.route('/list')
 @login_required
 def list_files():
-    files=[]
+    # Query the ProjectData table for all filenames
+    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    # Extract filenames from the result tuples
+    files = [file.filename for file in filenames]
+
+    # files=[]
     # with sqlite3.connect(app.config['DATABASE']) as conn:
     #     c = conn.cursor()
     #     c.execute('SELECT filename FROM images')
@@ -71,6 +79,20 @@ def list_files():
 @main.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
+    # Query the ProjectData table for the data where the filename matches
+    file_entry = ProjectData.query.filter_by(filename=filename).first()
+    
+    if file_entry:
+        file_data = file_entry.data
+        mime_type = mimetypes.guess_type(filename)[0]
+        
+        if mime_type:
+            return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, attachment_filename=filename)
+        else:
+            abort(400, description="MIME type could not be determined.")
+    else:
+        abort(404, description="File not found.")
+
     # with sqlite3.connect(app.config['DATABASE']) as conn:
     #     c = conn.cursor()
     #     c.execute('SELECT data FROM images WHERE filename=?', (filename,))
@@ -85,7 +107,21 @@ def uploaded_file(filename):
 @main.route('/mosaify')
 @login_required
 def mosaify():
-    print(current_user.id, current_user.username)
+    print(current_user.id, current_user.username, uuid.uuid4())
+    return render_template('mosaify.html')
+
+@main.route('/mosaify_new')
+@login_required
+def mosaify_new():
+    print(current_user.id, current_user.username, uuid.uuid4())
+    new_project = Project(user_id=current_user.id)
+
+    db.session.add(new_project)
+    db.session.commit()
+
+    # Store the project ID in the session
+    session['project_id'] = new_project.id
+
     return render_template('mosaify.html')
 
 @main.route('/upload', methods=['POST'])
@@ -95,7 +131,7 @@ def upload_file():
     for file in files:
         if file:
             filename = file.filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
             with open(file_path, 'rb') as f:
@@ -107,9 +143,27 @@ def upload_file():
             rows, cols = im.size
             comps = 4
 
+            project_id = session['project_id']
+
+            new_file = ProjectData(
+                project_id=project_id,  # You need to set the appropriate project_id here
+                user_id=current_user.id,
+                filename=filename,
+                data=pixels,
+                rows=rows,
+                cols=cols,
+                comps=comps
+            )
+
+            # Add the new file to the session and commit
+            db.session.add(new_file)
+            db.session.commit()
+
+            os.remove(file_path)
+
             # with sqlite3.connect(app.config['DATABASE']) as conn:
             #     c = conn.cursor()
             #     c.execute('INSERT INTO images (filename, data, rows, cols, comps) VALUES (?, ?, ?, ?, ?)', (filename, pixels, rows, cols, comps))
             #     conn.commit()
 
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.mosaify'))
