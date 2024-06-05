@@ -9,11 +9,11 @@
       {% for file in files %}
       <li>
         <img
-          src="{{ url_for('main.uploaded_file', filename=file[0]) }}"
-          alt="{{ file[0] }}"
+          src="{{ url_for('main.uploaded_file', filename=file) }}"
+          alt="{{ file }}"
           style="max-width: 200px"
         />
-        <p>{{ file[0] }}</p>
+        <p>{{ file }}</p>
       </li>
       {% endfor %}
     </ul>
