@@ -1,6 +1,6 @@
 # app/routes.py
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, current_app, abort, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, current_app, abort, session, g
 from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User
@@ -12,6 +12,8 @@ import mimetypes
 import io
 import os
 import uuid
+
+from app.common import find_number_in_array
 
 main = Blueprint('main', __name__)
 
@@ -55,7 +57,9 @@ def logout():
 @main.route('/home')
 @login_required
 def home():
-    return render_template('home.html')
+    all_projects = Project.query.filter_by(user_id=current_user.id).all()
+    projects = [proj.id for proj in all_projects]
+    return render_template('home.html', projects=projects)
 
 @main.route('/')
 def index():
@@ -97,6 +101,21 @@ def mosaify():
     projects = [proj.id for proj in all_projects]
     return render_template('mosaify.html', projects=projects)
 
+@main.route('/mosaify_previous/<project_id>')
+@login_required
+def mosaify_previous(project_id):
+    all_projects = Project.query.filter_by(user_id=current_user.id).all()
+    projects = [int(proj.id) for proj in all_projects]
+
+    if None != find_number_in_array(projects, int(project_id)):
+        print("found")
+        session['current_project_id'] = project_id
+    else:
+        print("not found", projects, project_id)
+
+    return redirect(url_for('main.mosaify'))
+
+
 @main.route('/mosaify_new')
 @login_required
 def mosaify_new():
@@ -106,7 +125,7 @@ def mosaify_new():
     db.session.commit()
 
     # Store the project ID in the session
-    session['project_id'] = new_project.id
+    session['current_project_id'] = new_project.id
 
     return render_template('mosaify.html')
 
@@ -129,10 +148,10 @@ def upload_file():
             # rows, cols = im.size
             # comps = 4
 
-            project_id = session['project_id']
+            current_project_id = session['current_project_id']
 
             new_file = ProjectData(
-                project_id=project_id,  # You need to set the appropriate project_id here
+                project_id=current_project_id,  # You need to set the appropriate project_id here
                 user_id=current_user.id,
                 filename=filename,
                 data=file_data
@@ -145,3 +164,16 @@ def upload_file():
             os.remove(file_path)
 
     return redirect(url_for('main.mosaify'))
+
+def get_current_project():
+    if 'current_project_id' in session:
+        current_project_id = session['current_project_id']
+        return Project.query.filter_by(id=current_project_id, user_id=current_user.id).first()
+    return None
+
+@main.before_request
+def load_current_project():
+    if current_user.is_authenticated:
+        g.current_project = get_current_project()
+    else:
+        g.current_project = None
