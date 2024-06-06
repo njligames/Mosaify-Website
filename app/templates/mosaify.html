@@ -51,6 +51,9 @@
     {% else %}
     <h2>No current project selected.</h2>
     {% endif %}
+    <br />
+    <a href="{{ url_for('main.home') }}">Projects</a>
+    <br />
     <h2>Upload Images</h2>
     <form id="upload-form" class="my-form">
       <div id="drop-area">
@@ -92,8 +95,6 @@
     <a href="{{ url_for('main.list_files') }}">List uploaded files</a>
     <br />
     <a href="{{ url_for('main.mosaify_run') }}">Create Mosaic</a>
-    <br />
-    <a href="{{ url_for('main.home') }}">Projects</a>
     <br />
 
     <script>

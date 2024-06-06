@@ -24,4 +24,7 @@ class ProjectData(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filename = db.Column(db.String, nullable=False)
+    rows = db.Column(db.Integer, nullable=False)
+    cols = db.Column(db.Integer, nullable=False)
+    comps = db.Column(db.Integer, nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)

@@ -7,6 +7,8 @@ from app.models import User
 from app.models import Project
 from app.models import ProjectData
 
+import MosaifyPy
+
 from PIL import Image
 import mimetypes
 import io
@@ -82,13 +84,24 @@ def uploaded_file(filename):
     file_entry = ProjectData.query.filter_by(filename=filename).first()
     
     if file_entry:
-        file_data = file_entry.data
-        mime_type = mimetypes.guess_type(filename)[0]
-        
-        if mime_type:
-            return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=filename)
-        else:
-            abort(400, description="MIME type could not be determined.")
+
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), file_entry.data) 
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
+        img.save(file_path)
+
+        file_data = None
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+
+        os.remove(file_path)
+
+        if None != file_data:
+            mime_type = mimetypes.guess_type(filename)[0]
+            
+            if mime_type:
+                return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=filename)
+            else:
+                abort(400, description="MIME type could not be determined.")
     else:
         abort(404, description="File not found.")
 
@@ -145,14 +158,14 @@ def upload_file():
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            with open(file_path, 'rb') as f:
-                file_data = f.read()
+            # with open(file_path, 'rb') as f:
+            #     file_data = f.read()
 
-            # im = Image.open(file_path)
-            # im = im.convert('RGBA')
-            # pixels = im.tobytes()
-            # rows, cols = im.size
-            # comps = 4
+            im = Image.open(file_path)
+            im = im.convert('RGB')
+            data = im.tobytes()
+            rows, cols = im.size
+            comps = 3
 
             current_project_id = session['current_project_id']
 
@@ -160,7 +173,10 @@ def upload_file():
                 project_id=current_project_id,  # You need to set the appropriate project_id here
                 user_id=current_user.id,
                 filename=filename,
-                data=file_data
+                data=data,
+                rows=rows,
+                cols=cols,
+                comps=comps
             )
 
             # Add the new file to the session and commit
@@ -187,10 +203,21 @@ def load_current_project():
 @main.route('/mosaify_run')
 @login_required
 def mosaify_run():
+
+    current_project_id = session['current_project_id']
+    queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id).all()
+
+    mosaify = MosaifyPy.Mosaify()
+    mosaify.setTileSize(8)
+    for id, filename, data, rows, cols, comps in queried_data:
+        mosaify.addTileImage(cols, rows, comps, data, filename, id)
+
+    all_projects = Project.query.filter_by(user_id=current_user.id).all()
+    projects = [proj.id for proj in all_projects]
+
     # Query the ProjectData table for all filenames
     filenames = ProjectData.query.with_entities(ProjectData.filename).all()
     # Extract filenames from the result tuples
     files = [file.filename for file in filenames]
-    print("TODO: create logic for generating the mosaic", files)
 
-    return render_template('mosaify.html')
+    return render_template('mosaify.html', projects=projects, files=files)
