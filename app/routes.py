@@ -92,14 +92,20 @@ def uploaded_file(filename):
     else:
         abort(404, description="File not found.")
 
-    # return 'File not found', 404
+    return 'File not found', 404
 
 @main.route('/mosaify')
 @login_required
 def mosaify():
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
     projects = [proj.id for proj in all_projects]
-    return render_template('mosaify.html', projects=projects)
+
+    # Query the ProjectData table for all filenames
+    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    # Extract filenames from the result tuples
+    files = [file.filename for file in filenames]
+
+    return render_template('mosaify.html', projects=projects, files=files)
 
 @main.route('/mosaify_previous/<project_id>')
 @login_required
@@ -108,10 +114,10 @@ def mosaify_previous(project_id):
     projects = [int(proj.id) for proj in all_projects]
 
     if None != find_number_in_array(projects, int(project_id)):
-        print("found")
         session['current_project_id'] = project_id
     else:
         print("not found", projects, project_id)
+
 
     return redirect(url_for('main.mosaify'))
 
@@ -177,3 +183,14 @@ def load_current_project():
         g.current_project = get_current_project()
     else:
         g.current_project = None
+
+@main.route('/mosaify_run')
+@login_required
+def mosaify_run():
+    # Query the ProjectData table for all filenames
+    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    # Extract filenames from the result tuples
+    files = [file.filename for file in filenames]
+    print("TODO: create logic for generating the mosaic", files)
+
+    return render_template('mosaify.html')

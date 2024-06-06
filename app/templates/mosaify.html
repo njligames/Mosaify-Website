@@ -78,9 +78,22 @@
       </div>
     </form>
 
+    <br />
+    <div>
+      <h1>Uploaded Images</h1>
+      {% for file in files %}
+      <img
+        src="{{ url_for('main.uploaded_file', filename=file) }}"
+        alt="{{ file }}"
+        style="max-width: 32px"
+      />
+      {% endfor %}
+    </div>
     <a href="{{ url_for('main.list_files') }}">List uploaded files</a>
     <br />
-    <a href="{{ url_for('main.home') }}">Mosaify Projects</a>
+    <a href="{{ url_for('main.mosaify_run') }}">Create Mosaic</a>
+    <br />
+    <a href="{{ url_for('main.home') }}">Projects</a>
     <br />
 
     <script>

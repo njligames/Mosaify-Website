@@ -45,8 +45,6 @@ def find_number_in_array(arr, num):
     # Perform binary search
     index_in_sorted = binary_search(sorted_arr, num)
 
-    print("index_in_sorted", index_in_sorted)
-
     if index_in_sorted == -1:
         return None
     else:

@@ -4,19 +4,21 @@
     <title>Uploaded Images</title>
   </head>
   <body>
-    <h1>Uploaded Images</h1>
-    <ul>
-      {% for file in files %}
-      <li>
-        <img
-          src="{{ url_for('main.uploaded_file', filename=file) }}"
-          alt="{{ file }}"
-          style="max-width: 200px"
-        />
-        <p>{{ file }}</p>
-      </li>
-      {% endfor %}
-    </ul>
+    <div>
+      <h1>Uploaded Images</h1>
+      <ul>
+        {% for file in files %}
+        <li>
+          <img
+            src="{{ url_for('main.uploaded_file', filename=file) }}"
+            alt="{{ file }}"
+            style="max-width: 200px"
+          />
+          <p>{{ file }}</p>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
     <a href="{{ url_for('main.mosaify') }}">Back to upload</a>
   </body>
 </html>
