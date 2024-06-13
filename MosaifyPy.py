@@ -5,11 +5,14 @@
 # the SWIG interface file instead.
 
 from sys import version_info as _swig_python_version_info
+import platform 
 # Import the low-level C/C++ module
 if __package__ or "." in __name__:
-    from . import _MosaifyPy
+    if platform.uname().system == "Darwin":
+        from . import _MosaifyPy_Darwin
 else:
-    import _MosaifyPy
+    if platform.uname().system == "Darwin":
+        import _MosaifyPy_Darwin
 
 try:
     import builtins as __builtin__
