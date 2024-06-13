@@ -8,6 +8,11 @@
         font-family: Arial, sans-serif;
         margin: 20px;
       }
+      .my-form {
+        margin-bottom: 10px;
+      }
+    </style>
+    <style>
       #drop-area-tilearea {
         border: 2px dashed #ccc;
         border-radius: 20px;
@@ -32,13 +37,43 @@
       #fileElem-tilearea {
         display: none;
       }
-      .my-form {
-        margin-bottom: 10px;
-      }
       #gallery-tilearea {
         margin-top: 10px;
       }
       #gallery-tilearea img {
+        width: 150px;
+        margin: 10px;
+      }
+    </style>
+    <style>
+      #drop-area-targetarea {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+      #upload-area-targetarea {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+      #drop-area-targetarea.highlight {
+        border-color: purple;
+      }
+      #fileElem-targetarea {
+        display: none;
+      }
+      #gallery-targetarea {
+        margin-top: 10px;
+      }
+      #gallery-targetarea img {
         width: 150px;
         margin: 10px;
       }
@@ -83,7 +118,7 @@
         </div>
       </form>
       <div>
-        <h1>Uploaded Images</h1>
+        <h1>Uploaded Tile Images</h1>
         {% for file in files %}
         <img
           src="{{ url_for('main.uploaded_file', filename=file) }}"
@@ -99,7 +134,7 @@
 
     <!-- Start Target Images -->
     <div>
-      <h2>Upload Tile Images</h2>
+      <h2>Upload The Target Image</h2>
       <form id="upload-form-targetarea" class="my-form">
         <div id="drop-area-targetarea">
           <p>Drag and drop Tile images here</p>
@@ -107,36 +142,36 @@
             type="file"
             id="fileElem-targetarea"
             name="files[]"
-            multiple
             accept="image/*"
-            onchange="handleTileAreaFiles(this.files)"
+            onchange="handleTargetAreaFiles(this.files)"
           />
           <input
             type="file"
             name="files[]"
-            multiple
             accept="image/*"
-            onchange="handleTileAreaFiles(this.files)"
+            onchange="handleTargetAreaFiles(this.files)"
           />
           <label class="button" for="fileElem-targetarea"></label>
         </div>
         <div id="upload-area-targetarea">
           <div id="gallery-targetarea"></div>
-          <button type="button" onclick="uploadTileAreaFiles()">Upload</button>
+          <button type="button" onclick="uploadTargetAreaFiles()">
+            Upload
+          </button>
         </div>
       </form>
       <div>
-        <h1>Uploaded Images</h1>
-        {% for file in files %}
+        <h1>Uploaded Target Image</h1>
+        {% for file in target_files %}
         <img
           src="{{ url_for('main.uploaded_file', filename=file) }}"
           alt="{{ file }}"
-          style="max-width: 32px"
+          style="max-width: 64px"
         />
         {% endfor %}
       </div>
       <br />
-      <a href="{{ url_for('main.list_files') }}">List uploaded files</a>
+      <!-- <a href="{{ url_for('main.list_files') }}">List uploaded files</a> -->
     </div>
     <!-- End Target Images -->
 
@@ -144,9 +179,10 @@
     <a href="{{ url_for('main.mosaify_run') }}">Create Mosaic</a>
     <br />
 
+    <!-- Start Tile Images -->
     <script>
       let dropArea_tilearea = document.getElementById("drop-area-tilearea");
-      let filesToUpload = [];
+      let filesToUpload_tilearea = [];
 
       ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
         dropArea_tilearea.addEventListener(eventName, preventDefaults, false);
@@ -183,7 +219,7 @@
 
       function handleTileAreaFiles(files) {
         files = [...files];
-        filesToUpload.push(...files);
+        filesToUpload_tilearea.push(...files);
         initializeTileAreaGallery(files);
       }
 
@@ -199,11 +235,11 @@
 
       function uploadTileAreaFiles() {
         let formData = new FormData();
-        filesToUpload.forEach((file) => {
+        filesToUpload_tilearea.forEach((file) => {
           formData.append("files[]", file);
         });
 
-        fetch("{{ url_for('main.upload_file') }}", {
+        fetch("{{ url_for('main.upload_tilefiles') }}", {
           method: "POST",
           body: formData,
         }).then((response) => {
@@ -215,5 +251,92 @@
         });
       }
     </script>
+    <!-- End Tile Images -->
+
+    <!-- Start Target Images -->
+    <script>
+      let dropArea_targetarea = document.getElementById("drop-area-targetarea");
+      let filesToUpload_targetarea = [];
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea_targetarea.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropArea_targetarea.addEventListener(
+          eventName,
+          () => dropArea_targetarea.classList.add("highlight"),
+          false
+        );
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropArea_targetarea.addEventListener(
+          eventName,
+          () => dropArea_targetarea.classList.remove("highlight"),
+          false
+        );
+      });
+
+      dropArea_targetarea.addEventListener("drop", handleTargetAreaDrop, false);
+
+      function handleTargetAreaDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleTargetAreaFiles(files);
+      }
+
+      function handleTargetAreaFiles(files) {
+        files = [...files];
+        // filesToUpload_targetarea.push(...files);
+        // initializeTargetAreaGallery(files);
+
+        // Check if there are any files
+        if (files.length > 0) {
+          // Get the first file
+          const firstFile = files[0];
+
+          // Add the first file to the filesToUpload_targetarea array
+          filesToUpload_targetarea.push(firstFile);
+
+          // Initialize the gallery with the first file
+          initializeTargetAreaGallery([firstFile]);
+        }
+      }
+
+      function initializeTargetAreaGallery(files) {
+        let gallery_targetarea = document.getElementById("gallery-targetarea");
+        gallery_targetarea.innerHTML = "";
+        files.forEach((file) => {
+          let img = document.createElement("img");
+          img.src = URL.createObjectURL(file);
+          gallery_targetarea.appendChild(img);
+        });
+      }
+
+      function uploadTargetAreaFiles() {
+        let formData = new FormData();
+        filesToUpload_targetarea.forEach((file) => {
+          formData.append("files[]", file);
+        });
+
+        fetch("{{ url_for('main.upload_targetfiles') }}", {
+          method: "POST",
+          body: formData,
+        }).then((response) => {
+          if (response.ok) {
+            window.location.href = "{{ url_for('main.mosaify') }}";
+          } else {
+            alert("Error uploading files");
+          }
+        });
+      }
+    </script>
+    <!-- End Target Images -->
   </body>
 </html>

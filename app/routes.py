@@ -7,7 +7,7 @@ from app.models import User
 from app.models import Project
 from app.models import ProjectData
 
-import MosaifyPy
+# import MosaifyPy
 
 from PIL import Image
 import mimetypes
@@ -16,6 +16,12 @@ import os
 import uuid
 
 from app.common import find_number_in_array
+
+
+import platform 
+ 
+print("Printing Platform")
+print(platform.uname())
 
 main = Blueprint('main', __name__)
 
@@ -113,12 +119,14 @@ def mosaify():
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
     projects = [proj.id for proj in all_projects]
 
-    # Query the ProjectData table for all filenames
-    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
-    # Extract filenames from the result tuples
+    current_project_id = session['current_project_id']
+    filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=False).all()
     files = [file.filename for file in filenames]
 
-    return render_template('mosaify.html', projects=projects, files=files)
+    target_filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=True).all()
+    target_files = [file.filename for file in target_filenames]
+
+    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)
 
 @main.route('/mosaify_previous/<project_id>')
 @login_required
@@ -148,9 +156,9 @@ def mosaify_new():
 
     return render_template('mosaify.html')
 
-@main.route('/upload', methods=['POST'])
+@main.route('/upload_tilefiles', methods=['POST'])
 @login_required
-def upload_file():
+def upload_tilefiles():
     files = request.files.getlist('files[]')
     for file in files:
         if file:
@@ -176,7 +184,48 @@ def upload_file():
                 data=data,
                 rows=rows,
                 cols=cols,
-                comps=comps
+                comps=comps,
+                is_target=False
+            )
+
+            # Add the new file to the session and commit
+            db.session.add(new_file)
+            db.session.commit()
+
+            os.remove(file_path)
+
+    return redirect(url_for('main.mosaify'))
+
+@main.route('/upload_targetfiles', methods=['POST'])
+@login_required
+def upload_targetfiles():
+    files = request.files.getlist('files[]')
+    for file in files:
+        if file:
+            filename = file.filename
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            # with open(file_path, 'rb') as f:
+            #     file_data = f.read()
+
+            im = Image.open(file_path)
+            im = im.convert('RGB')
+            data = im.tobytes()
+            rows, cols = im.size
+            comps = 3
+
+            current_project_id = session['current_project_id']
+
+            new_file = ProjectData(
+                project_id=current_project_id,  # You need to set the appropriate project_id here
+                user_id=current_user.id,
+                filename=filename,
+                data=data,
+                rows=rows,
+                cols=cols,
+                comps=comps,
+                is_target=True
             )
 
             # Add the new file to the session and commit
@@ -204,20 +253,36 @@ def load_current_project():
 @login_required
 def mosaify_run():
 
-    current_project_id = session['current_project_id']
-    queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id).all()
-
-    mosaify = MosaifyPy.Mosaify()
-    mosaify.setTileSize(8)
-    for id, filename, data, rows, cols, comps in queried_data:
-        mosaify.addTileImage(cols, rows, comps, data, filename, id)
+    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    files = [file.filename for file in filenames]
 
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
     projects = [proj.id for proj in all_projects]
 
-    # Query the ProjectData table for all filenames
-    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
-    # Extract filenames from the result tuples
-    files = [file.filename for file in filenames]
+    target_files = []
 
-    return render_template('mosaify.html', projects=projects, files=files)
+    current_project_id = session['current_project_id']
+    target_queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id, is_target=True).all()
+    # There really should only be one.
+    for id_target, filename_target, data_target, rows_target, cols_target, comps_target in target_queried_data:
+        target_files.append(filename_target)
+
+        current_project_id = session['current_project_id']
+        queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id).all()
+
+        # mosaify = MosaifyPy.Mosaify()
+        # mosaify.setTileSize(8)
+        # for id, filename, data, rows, cols, comps in queried_data:
+        #     mosaify.addTileImage(cols, rows, comps, data, filename, id)
+
+        # if mosaify.generate(rows_target, cols_target, comps_target, data_target):
+        #     print('IS generated')
+        # else:
+        #     print("not generated")
+
+        
+
+    # target_filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=True).all()
+    # target_files = [file.filename for file in target_filenames]
+
+    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)

@@ -28,3 +28,4 @@ class ProjectData(db.Model):
     cols = db.Column(db.Integer, nullable=False)
     comps = db.Column(db.Integer, nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
+    is_target = db.Column(db.Boolean, default=False, nullable=False)
