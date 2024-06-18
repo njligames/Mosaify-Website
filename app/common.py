@@ -50,3 +50,26 @@ def find_number_in_array(arr, num):
     else:
         # Find the index of the number in the original array
         return arr.index(sorted_arr[index_in_sorted])
+
+def create_square(width, height):
+    """
+    Returns the dimensions of the largest possible square that can fit within a rectangle.
+    
+    Args:
+    width (float): The width of the rectangle.
+    height (float): The height of the rectangle.
+    
+    Returns:
+    tuple: A tuple containing the left x-coordinate, top y-coordinate, and the side length of the square.
+    """
+    
+    # Calculate the side length of the square, which is the smaller of the width and height
+    side = min(width, height)
+    
+    # Calculate the left x-coordinate to center the square within the rectangle
+    left = (width - side) / 2
+    
+    # Calculate the top y-coordinate to center the square within the rectangle
+    top = (height - side) / 2
+    
+    return left, top, side

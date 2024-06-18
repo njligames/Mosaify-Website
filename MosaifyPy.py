@@ -5,14 +5,14 @@
 # the SWIG interface file instead.
 
 from sys import version_info as _swig_python_version_info
-import platform 
+import platform
 # Import the low-level C/C++ module
 if __package__ or "." in __name__:
     if platform.uname().system == "Darwin":
-        from . import _MosaifyPy_Darwin
+        from . import _MosaifyPy
 else:
     if platform.uname().system == "Darwin":
-        import _MosaifyPy_Darwin
+        import _MosaifyPy
 
 try:
     import builtins as __builtin__
@@ -87,6 +87,12 @@ class Mosaify(object):
         _MosaifyPy.Mosaify_swiginit(self, _MosaifyPy.new_Mosaify())
     __swig_destroy__ = _MosaifyPy.delete_Mosaify
 
+    def getMaxWidth(self):
+        return _MosaifyPy.Mosaify_getMaxWidth(self)
+
+    def getMaxHeight(self):
+        return _MosaifyPy.Mosaify_getMaxHeight(self)
+
     def setTileSize(self, tileSize):
         return _MosaifyPy.Mosaify_setTileSize(self, tileSize)
 
@@ -102,18 +108,33 @@ class Mosaify(object):
     def hasTileImage(self, id):
         return _MosaifyPy.Mosaify_hasTileImage(self, id)
 
+    def getTileImage(self, id, img):
+        return _MosaifyPy.Mosaify_getTileImage(self, id, img)
+
     def updateTileImage(self, width, height, components, data, filepath, id):
         return _MosaifyPy.Mosaify_updateTileImage(self, width, height, components, data, filepath, id)
 
     def generate(self, width, height, components, data):
         return _MosaifyPy.Mosaify_generate(self, width, height, components, data)
 
-    def getMosaicImage(self):
-        return _MosaifyPy.Mosaify_getMosaicImage(self)
+    def getMosaicImage(self, img):
+        return _MosaifyPy.Mosaify_getMosaicImage(self, img)
 
-    def getMosaicMap(self):
-        return _MosaifyPy.Mosaify_getMosaicMap(self)
+    def getMosaicJsonArray(self):
+        return _MosaifyPy.Mosaify_getMosaicJsonArray(self)
+
+    def getMosaicMap(self, *args):
+        return _MosaifyPy.Mosaify_getMosaicMap(self, *args)
 
 # Register Mosaify in _MosaifyPy:
 _MosaifyPy.Mosaify_swigregister(Mosaify)
+
+def getMosaicPath(mosaify):
+    return _MosaifyPy.getMosaicPath(mosaify)
+
+def getMosaicPreviewPath(mosaify):
+    return _MosaifyPy.getMosaicPreviewPath(mosaify)
+
+def getMosaicTilePreviewPath(mosaify, _id):
+    return _MosaifyPy.getMosaicTilePreviewPath(mosaify, _id)
 

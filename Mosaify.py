@@ -1,5 +1,7 @@
 import MosaifyPy
 from PIL import Image
+import os
+import json
 
 class Mosaify:
 	def __init__(self):
@@ -12,7 +14,7 @@ class Mosaify:
 	    im = Image.open(path)
 	    im = im.convert('RGBA')
 
-	    rows,cols = im.size
+	    cols,rows = im.size
 	    s = im.tobytes() # Must keep a reference
 	    imgdata = s
 	    comp = 4
@@ -36,11 +38,32 @@ class Mosaify:
 	def getTileSize(self):
 		return self.mosaic.getTileSize()
 
+	def getTileImage(self, _id):
+		path = MosaifyPy.getMosaicTilePreviewPath(self.mosaic, _id)
+		image = Image.open(path)
+		os.remove(path)
+		return image
 
 	def generate(self, path):
 		width, height, comp, imgdata = self.__pil_image(path)
 		return self.mosaic.generate(width, height, comp, imgdata)
 
-	def getMap(self):
+	def getMosaicMap(self):
 		mosaicMap = self.mosaic.getMosaicMap()
-		return mosaicMap
+		d = json.loads(mosaicMap)
+		return json.dumps(d, indent=4)
+
+	def getMosaicImage(self):
+		path = MosaifyPy.getMosaicPreviewPath(self.mosaic)
+		image = Image.open(path)
+		os.remove(path)
+		return image
+
+	def getMosaicJsonArray(self):
+		return self.mosaic.getMosaicJsonArray()
+
+	def getMosaicPath(self):
+		path = MosaifyPy.getMosaicPath(self.mosaic)
+		return path
+
+

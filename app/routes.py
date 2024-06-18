@@ -7,7 +7,7 @@ from app.models import User
 from app.models import Project
 from app.models import ProjectData
 
-# import MosaifyPy
+import MosaifyPy
 
 from PIL import Image
 import mimetypes
@@ -270,19 +270,15 @@ def mosaify_run():
         current_project_id = session['current_project_id']
         queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id).all()
 
-        # mosaify = MosaifyPy.Mosaify()
-        # mosaify.setTileSize(8)
-        # for id, filename, data, rows, cols, comps in queried_data:
-        #     mosaify.addTileImage(cols, rows, comps, data, filename, id)
+        mosaify = MosaifyPy.Mosaify()
+        mosaify.setTileSize(8)
+        for id, filename, data, rows, cols, comps in queried_data:
+            mosaify.addTileImage(cols, rows, comps, data, filename, id)
 
-        # if mosaify.generate(rows_target, cols_target, comps_target, data_target):
-        #     print('IS generated')
-        # else:
-        #     print("not generated")
-
-        
-
-    # target_filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=True).all()
-    # target_files = [file.filename for file in target_filenames]
+        if mosaify.generate(rows_target, cols_target, comps_target, data_target):
+            preview_path = MosaifyPy.getMosaicPreviewPath(mosaify)
+            print('IS generated', preview_path)
+        else:
+            print("not generated")
 
     return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)
