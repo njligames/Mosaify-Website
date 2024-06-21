@@ -15,11 +15,15 @@ class User(db.Model, UserMixin):
     projects = db.relationship('Project', backref='user', lazy=True)
 
 class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    project_data = db.relationship('ProjectData', backref='project', lazy=True)
+    id                    = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id               = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    mosaic_tiles          = db.relationship('MosaicTiles', backref='project', lazy=True)
+    mosaic_target_images  = db.relationship('MosaicTargetImages', backref='project', lazy=True)
+    mosaic_preview_images = db.relationship('MosaicPreviewImages', backref='project', lazy=True)
+    mosaic                = db.relationship('Mosaic', backref='project', lazy=True)
 
-class ProjectData(db.Model):
+# This will hold all of the tiles that will be used to create a mosaic.
+class MosaicTiles(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -28,4 +32,32 @@ class ProjectData(db.Model):
     cols = db.Column(db.Integer, nullable=False)
     comps = db.Column(db.Integer, nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
-    is_target = db.Column(db.Boolean, default=False, nullable=False)
+
+# This will hold the mosaic target images.
+class MosaicTargetImages(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    filename = db.Column(db.String, nullable=False)
+    rows = db.Column(db.Integer, nullable=False)
+    cols = db.Column(db.Integer, nullable=False)
+    comps = db.Column(db.Integer, nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
+
+# This will hold the mosaic preview images.
+class MosaicPreviewImages(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    filename = db.Column(db.String, nullable=False)
+    rows = db.Column(db.Integer, nullable=False)
+    cols = db.Column(db.Integer, nullable=False)
+    comps = db.Column(db.Integer, nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
+
+# This will hold the binary data of the final mosaic that was created.
+class Mosaic(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)

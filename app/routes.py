@@ -5,7 +5,10 @@ from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User
 from app.models import Project
-from app.models import ProjectData
+from app.models import MosaicTiles
+from app.models import MosaicTargetImages
+from app.models import MosaicPreviewImages
+from app.models import Mosaic
 
 import MosaifyPy
 
@@ -76,18 +79,19 @@ def index():
 @main.route('/list')
 @login_required
 def list_files():
-    # Query the ProjectData table for all filenames
-    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    # Query the MosaicTiles table for all filenames
+    filenames = MosaicTiles.query.with_entities(MosaicTiles.filename).all()
     # Extract filenames from the result tuples
     files = [file.filename for file in filenames]
+    files.sort()
 
     return render_template('list.html', files=files)
 
 @main.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
-    # Query the ProjectData table for the data where the filename matches
-    file_entry = ProjectData.query.filter_by(filename=filename).first()
+    # Query the MosaicTiles table for the data where the filename matches
+    file_entry = MosaicTiles.query.filter_by(filename=filename).first()
     
     if file_entry:
 
@@ -120,10 +124,10 @@ def mosaify():
     projects = [proj.id for proj in all_projects]
 
     current_project_id = session['current_project_id']
-    filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=False).all()
+    filenames = MosaicTiles.query.with_entities(MosaicTiles.filename).filter_by(project_id=current_project_id).all()
     files = [file.filename for file in filenames]
 
-    target_filenames = ProjectData.query.with_entities(ProjectData.filename).filter_by(project_id=current_project_id, is_target=True).all()
+    target_filenames = MosaicTargetImages.query.with_entities(MosaicTargetImages.filename).filter_by(project_id=current_project_id).all()
     target_files = [file.filename for file in target_filenames]
 
     return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)
@@ -166,33 +170,32 @@ def upload_tilefiles():
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            # with open(file_path, 'rb') as f:
-            #     file_data = f.read()
+            try:
+                with Image.open(file_path) as im:
+                    # Process the image here
+                    im = im.convert('RGB')
+                    data = im.tobytes()
+                    rows, cols = im.size
+                    comps = 3
 
-            im = Image.open(file_path)
-            im = im.convert('RGB')
-            data = im.tobytes()
-            rows, cols = im.size
-            comps = 3
+                    current_project_id = session['current_project_id']
 
-            current_project_id = session['current_project_id']
+                    new_file = MosaicTiles(
+                        project_id=current_project_id,  # You need to set the appropriate project_id here
+                        user_id=current_user.id,
+                        filename=filename,
+                        data=data,
+                        rows=rows,
+                        cols=cols,
+                        comps=comps
+                    )
 
-            new_file = ProjectData(
-                project_id=current_project_id,  # You need to set the appropriate project_id here
-                user_id=current_user.id,
-                filename=filename,
-                data=data,
-                rows=rows,
-                cols=cols,
-                comps=comps,
-                is_target=False
-            )
-
-            # Add the new file to the session and commit
-            db.session.add(new_file)
-            db.session.commit()
-
-            os.remove(file_path)
+                    # Add the new file to the session and commit
+                    db.session.add(new_file)
+                    db.session.commit()
+                os.remove(file_path)
+            except IOError:
+                print("An error occurred while trying to open the image.")
 
     return redirect(url_for('main.mosaify'))
 
@@ -206,33 +209,34 @@ def upload_targetfiles():
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
-            # with open(file_path, 'rb') as f:
-            #     file_data = f.read()
+            try:
+                with Image.open(file_path) as im:
+                    # Process the image here
+                    im = im.convert('RGB')
+                    data = im.tobytes()
+                    rows, cols = im.size
+                    comps = 3
 
-            im = Image.open(file_path)
-            im = im.convert('RGB')
-            data = im.tobytes()
-            rows, cols = im.size
-            comps = 3
+                    current_project_id = session['current_project_id']
 
-            current_project_id = session['current_project_id']
+                    new_file = MosaicTargetImages(
+                        project_id=current_project_id,  # You need to set the appropriate project_id here
+                        user_id=current_user.id,
+                        filename=filename,
+                        data=data,
+                        rows=rows,
+                        cols=cols,
+                        comps=comps
+                    )
 
-            new_file = ProjectData(
-                project_id=current_project_id,  # You need to set the appropriate project_id here
-                user_id=current_user.id,
-                filename=filename,
-                data=data,
-                rows=rows,
-                cols=cols,
-                comps=comps,
-                is_target=True
-            )
+                    # Add the new file to the session and commit
+                    db.session.add(new_file)
+                    db.session.commit()
 
-            # Add the new file to the session and commit
-            db.session.add(new_file)
-            db.session.commit()
+                os.remove(file_path)
 
-            os.remove(file_path)
+            except IOError:
+                print("An error occurred while trying to open the image.")
 
     return redirect(url_for('main.mosaify'))
 
@@ -253,7 +257,7 @@ def load_current_project():
 @login_required
 def mosaify_run():
 
-    filenames = ProjectData.query.with_entities(ProjectData.filename).all()
+    filenames = MosaicTiles.query.with_entities(MosaicTiles.filename).all()
     files = [file.filename for file in filenames]
 
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
@@ -262,13 +266,12 @@ def mosaify_run():
     target_files = []
 
     current_project_id = session['current_project_id']
-    target_queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id, is_target=True).all()
+    target_queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
     # There really should only be one.
     for id_target, filename_target, data_target, rows_target, cols_target, comps_target in target_queried_data:
         target_files.append(filename_target)
 
-        current_project_id = session['current_project_id']
-        queried_data = ProjectData.query.with_entities(ProjectData.id, ProjectData.filename, ProjectData.data, ProjectData.rows, ProjectData.cols, ProjectData.comps).filter_by(project_id=current_project_id).all()
+        queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
 
         mosaify = MosaifyPy.Mosaify()
         mosaify.setTileSize(8)
@@ -277,7 +280,54 @@ def mosaify_run():
 
         if mosaify.generate(rows_target, cols_target, comps_target, data_target):
             preview_path = MosaifyPy.getMosaicPreviewPath(mosaify)
-            print('IS generated', preview_path)
+            main_path = MosaifyPy.getMosaicPath()
+            print('\n\n\n\n\nIS generated')
+            print(preview_path)
+            print(main_path)
+            print('\n\n\n\n\n')
+
+            try:
+                with Image.open(preview_path) as im:
+                    # Process the image here
+                    im = im.convert('RGB')
+                    data = im.tobytes()
+                    rows, cols = im.size
+                    comps = 3
+
+                    new_file = MosaicPreviewImages(
+                        project_id=current_project_id,  # You need to set the appropriate project_id here
+                        user_id=current_user.id,
+                        filename=filename,
+                        data=data,
+                        rows=rows,
+                        cols=cols,
+                        comps=comps
+                    )
+
+                    # Add the new file to the session and commit
+                    db.session.add(new_file)
+                    db.session.commit()
+
+                os.remove(preview_path)
+
+                with open(main_path, 'rb') as f:
+                    file_data = f.read()
+
+                    new_file = Mosaic(
+                        project_id=current_project_id,  # You need to set the appropriate project_id here
+                        user_id=current_user.id,
+                        data=data
+                    )
+
+                    # Add the new file to the session and commit
+                    db.session.add(new_file)
+                    db.session.commit()
+
+                os.remove(main_path)
+
+            except IOError:
+                print("An error occurred while trying to open the image.")
+
         else:
             print("not generated")
 
