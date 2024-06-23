@@ -10,7 +10,7 @@
         {% for file in files %}
         <li>
           <img
-            src="{{ url_for('main.uploaded_file', filename=file) }}"
+            src="{{ url_for('main.uploaded_tile_file', id=file) }}"
             alt="{{ file }}"
             style="max-width: 200px"
           />

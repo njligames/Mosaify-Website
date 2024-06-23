@@ -121,7 +121,7 @@
         <h1>Uploaded Tile Images</h1>
         {% for file in files %}
         <img
-          src="{{ url_for('main.uploaded_file', filename=file) }}"
+          src="{{ url_for('main.uploaded_tile_file', id=file) }}"
           alt="{{ file }}"
           style="max-width: 32px"
         />
@@ -164,7 +164,7 @@
         <h1>Uploaded Target Image</h1>
         {% for file in target_files %}
         <img
-          src="{{ url_for('main.uploaded_file', filename=file) }}"
+          src="{{ url_for('main.uploaded_target_file', id=file) }}"
           alt="{{ file }}"
           style="max-width: 64px"
         />
