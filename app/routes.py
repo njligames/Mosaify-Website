@@ -299,9 +299,10 @@ def mosaify_run():
     target_queried_data = MosaicTargetImages.query.with_entities(MosaicTargetImages.id, MosaicTargetImages.filename, MosaicTargetImages.data, MosaicTargetImages.rows, MosaicTargetImages.cols, MosaicTargetImages.comps).filter_by(project_id=current_project_id).all()
     # There really should only be one.
 
-    my_target = target_queried_data[0]
-    if None == my_target:
+    if len(target_queried_data) == 0:
         abort(404, description="No Target Found.")
+
+    my_target = target_queried_data[0]
 
     # print(my_target)
 
