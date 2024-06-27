@@ -1,11 +1,35 @@
-import MosaifyPy
+
+from MosaifyPy import isDarwin
+if isDarwin():
+    import MosaifyPy_Darwin
+
 from PIL import Image
 import os
 import json
 
 class Mosaify:
+	def __MosaifyPy(self):
+	    if isDarwin():
+	        return MosaifyPy_Darwin.Mosaify()
+	    return None
+
+	def __getMosaicTilePreviewPath(self, _mosaic, _id):
+	    if isDarwin():
+	        return MosaifyPy_Darwin.getMosaicTilePreviewPath(_mosaic, _id)
+	    return ""
+
+	def __getMosaicPreviewPath(self, _mosaic):
+	    if isDarwin():
+	        return MosaifyPy_Darwin.getMosaicPreviewPath(_mosaic)
+	    return ""
+
+	def __getMosaicPath(self, _mosaic):
+	    if isDarwin():
+	        return MosaifyPy_Darwin.getMosaicPath(_mosaic)
+	    return ""
+
 	def __init__(self):
-		self.mosaic = MosaifyPy.Mosaify()
+		self.mosaic = self.__MosaifyPy()
 
 	def setTileSize(self, side):
 		self.mosaic.setTileSize(side)
@@ -20,6 +44,9 @@ class Mosaify:
 	    comp = 4
 
 	    return cols, rows, comp, imgdata
+
+	def addTileImage(self, width, height, comp, imgdata, path, _id):
+		self.mosaic.addTileImage(width, height, comp, imgdata, path, _id)
 
 	def addTile(self, _id, path):
 		width, height, comp, imgdata = self.__pil_image(path)
@@ -38,14 +65,17 @@ class Mosaify:
 	def getTileSize(self):
 		return self.mosaic.getTileSize()
 
+	def getMosaicTilePreviewPath(self, _id):
+		return self.__getMosaicTilePreviewPath(self.mosaic, _id)
+
 	def getTileImage(self, _id):
-		path = MosaifyPy.getMosaicTilePreviewPath(self.mosaic, _id)
+		path = self.getMosaicTilePreviewPath(_id)
 		image = Image.open(path)
 		os.remove(path)
 		return image
 
-	def generate(self, path):
-		width, height, comp, imgdata = self.__pil_image(path)
+	def generate(self, width, height, comp, imgdata):
+		# width, height, comp, imgdata = self.__pil_image(path)
 		return self.mosaic.generate(width, height, comp, imgdata)
 
 	def getMosaicMap(self):
@@ -53,8 +83,11 @@ class Mosaify:
 		d = json.loads(mosaicMap)
 		return json.dumps(d, indent=4)
 
+	def getMosaicPreviewPath(self):
+		return self.__getMosaicPreviewPath(self.mosaic)
+
 	def getMosaicImage(self):
-		path = MosaifyPy.getMosaicPreviewPath(self.mosaic)
+		path = self.getMosaicPreviewPath()
 		image = Image.open(path)
 		os.remove(path)
 		return image
@@ -63,7 +96,6 @@ class Mosaify:
 		return self.mosaic.getMosaicJsonArray()
 
 	def getMosaicPath(self):
-		path = MosaifyPy.getMosaicPath(self.mosaic)
-		return path
+		return self.__getMosaicPath(self.mosaic)
 
 

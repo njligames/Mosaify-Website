@@ -10,7 +10,7 @@ from app.models import MosaicTargetImages
 from app.models import MosaicPreviewImages
 from app.models import Mosaic
 
-import MosaifyPy
+import Mosaify
 
 from PIL import Image
 import mimetypes
@@ -310,15 +310,15 @@ def mosaify_run():
 
     queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
 
-    mosaify = MosaifyPy.Mosaify()
+    mosaify = Mosaify.Mosaify()
     mosaify.setTileSize(8)
     for id, filename, data, rows, cols, comps in queried_data:
         mosaify.addTileImage(cols, rows, comps, data, filename, id)
 
     print("Generating the Mosaic...")
     if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, my_target.data):
-        preview_path = MosaifyPy.getMosaicPreviewPath(mosaify)
-        main_path = MosaifyPy.getMosaicPath(mosaify)
+        preview_path = mosaify.getMosaicPreviewPath()
+        main_path = mosaify.getMosaicPath()
         print('Mosaic was generated SUCCESSFULLY')
 
         try:
