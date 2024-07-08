@@ -1,7 +1,10 @@
 
 from MosaifyPy import isDarwin
+from MosaifyPy import isLinux
 if isDarwin():
     import MosaifyPy_Darwin
+if isLinux():
+    import MosaifyPy_Linux
 
 from PIL import Image
 import os
