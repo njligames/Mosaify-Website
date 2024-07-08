@@ -17,6 +17,7 @@ import mimetypes
 import io
 import os
 import uuid
+import zlib
 
 from app.common import find_number_in_array
 
@@ -95,7 +96,8 @@ def uploaded_tile_file(id):
     
     if file_entry:
 
-        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), file_entry.data) 
+        d = zlib.decompress(file_entry.data)
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
         img.save(file_path)
 
@@ -117,6 +119,57 @@ def uploaded_tile_file(id):
 
     return 'File not found', 404
 
+@main.route('/mosaic_preview_uploads/<id>')
+@login_required
+def uploaded_mosaic_image_preview_file(id):
+    # Query the MosaicTiles table for the data where the filename matches
+    file_entry = MosaicPreviewImages.query.filter_by(id=id).first()
+    
+    if file_entry:
+
+        d = zlib.decompress(file_entry.data)
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
+        img.save(file_path)
+
+        file_data = None
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+
+        os.remove(file_path)
+
+        if None != file_data:
+            mime_type = mimetypes.guess_type(file_entry.filename)[0]
+            
+            if mime_type:
+                return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
+            else:
+                abort(400, description="MIME type could not be determined.")
+    else:
+        abort(404, description="File not found.")
+
+    return 'File not found', 404
+
+@main.route('/mosaic_uploads/<id>')
+@login_required
+def uploaded_mosaic_image_file(id):
+    # Query the MosaicTiles table for the data where the filename matches
+    file_entry = Mosaic.query.filter_by(id=id).first()
+    
+    if file_entry:
+        if None != file_entry.data:
+            mime_type = mimetypes.guess_type(file_entry.filename)[0]
+            
+            if mime_type:
+                d = zlib.decompress(file_entry.data)
+                return send_file(io.BytesIO(d), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
+            else:
+                abort(400, description="MIME type could not be determined.")
+    else:
+        abort(404, description="File not found.")
+
+    return 'File not found', 404
+
 @main.route('/target_uploads/<id>')
 @login_required
 def uploaded_target_file(id):
@@ -125,7 +178,8 @@ def uploaded_target_file(id):
     
     if file_entry:
 
-        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), file_entry.data) 
+        d = zlib.decompress(file_entry.data)
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
         img.save(file_path)
 
@@ -160,7 +214,17 @@ def mosaify():
     target_filenames = MosaicTargetImages.query.with_entities(MosaicTargetImages.filename, MosaicTargetImages.id).filter_by(project_id=current_project_id).all()
     target_files = [file.id for file in target_filenames]
 
-    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)
+    mosaic_image_preview = MosaicPreviewImages.query.with_entities(MosaicPreviewImages.id).filter_by(project_id=current_project_id).first()
+    mosaic_image_preview_id = None
+    if mosaic_image_preview and len(mosaic_image_preview) > 0:
+        mosaic_image_preview_id = mosaic_image_preview[0]
+
+    mosaic_image = Mosaic.query.with_entities(Mosaic.id).filter_by(project_id=current_project_id).first()
+    mosaic_image_id = None
+    if mosaic_image and len(mosaic_image) > 0:
+        mosaic_image_id = mosaic_image[0]
+
+    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files, mosaic_image_preview_id=mosaic_image_preview_id, mosaic_image_id=mosaic_image_id)
 
 @main.route('/mosaify_previous/<project_id>')
 @login_required
@@ -214,7 +278,7 @@ def upload_tilefiles():
                         project_id=current_project_id,  # You need to set the appropriate project_id here
                         user_id=current_user.id,
                         filename=filename,
-                        data=data,
+                        data=zlib.compress(data),
                         rows=rows,
                         cols=cols,
                         comps=comps
@@ -253,7 +317,7 @@ def upload_targetfiles():
                         project_id=current_project_id,  # You need to set the appropriate project_id here
                         user_id=current_user.id,
                         filename=filename,
-                        data=data,
+                        data=zlib.compress(data),
                         rows=rows,
                         cols=cols,
                         comps=comps
@@ -296,6 +360,7 @@ def mosaify_run():
     target_files = []
 
     current_project_id = session['current_project_id']
+
     target_queried_data = MosaicTargetImages.query.with_entities(MosaicTargetImages.id, MosaicTargetImages.filename, MosaicTargetImages.data, MosaicTargetImages.rows, MosaicTargetImages.cols, MosaicTargetImages.comps).filter_by(project_id=current_project_id).all()
     # There really should only be one.
 
@@ -313,10 +378,31 @@ def mosaify_run():
     mosaify = Mosaify.Mosaify()
     mosaify.setTileSize(8)
     for id, filename, data, rows, cols, comps in queried_data:
-        mosaify.addTileImage(cols, rows, comps, data, filename, id)
+        d = zlib.decompress(data)
+        mosaify.addTileImage(cols, rows, comps, d, filename, id)
 
     print("Generating the Mosaic...")
-    if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, my_target.data):
+
+    # entries = MosaicPreviewImages.query(MosaicPreviewImages).filter(MosaicPreviewImages.project_id == current_project_id).all()
+    entries = MosaicPreviewImages.query.filter_by(project_id=current_project_id).all()
+    for entry in entries:
+        if entry:
+            # If an entry is found, delete it
+            db.session.delete(entry)
+            db.session.commit()
+
+    # entries = Mosaic.query(Mosaic).filter(Mosaic.project_id == current_project_id).all()
+    entries = Mosaic.query.filter_by(project_id=current_project_id).all()
+    for entry in entries:
+        if entry:
+            # If an entry is found, delete it
+            db.session.delete(entry)
+            db.session.commit()
+
+    mosaic_image_preview_id = None
+    mosaic_image_id = None
+    d = zlib.decompress(my_target.data)
+    if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d):
         preview_path = mosaify.getMosaicPreviewPath()
         main_path = mosaify.getMosaicPath()
         print('Mosaic was generated SUCCESSFULLY')
@@ -333,7 +419,7 @@ def mosaify_run():
                     project_id=current_project_id,  # You need to set the appropriate project_id here
                     user_id=current_user.id,
                     filename=preview_path,
-                    data=data,
+                    data=zlib.compress(data),
                     rows=rows,
                     cols=cols,
                     comps=comps
@@ -347,17 +433,18 @@ def mosaify_run():
             os.remove(preview_path)
 
             with open(main_path, 'rb') as f:
-                file_data = f.read()
+                data = f.read()
 
-                new_file = Mosaic(
-                    project_id=current_project_id,  # You need to set the appropriate project_id here
-                    user_id=current_user.id,
-                    data=data
-                )
+                # new_file = Mosaic(
+                #     project_id=current_project_id,  # You need to set the appropriate project_id here
+                #     user_id=current_user.id,
+                #     data=zlib.compress(data),
+                #     filename=main_path
+                # )
 
-                # Add the new file to the session and commit
-                db.session.add(new_file)
-                db.session.commit()
+                # # Add the new file to the session and commit
+                # db.session.add(new_file)
+                # db.session.commit()
 
             # print(main_path)
             os.remove(main_path)
@@ -365,7 +452,18 @@ def mosaify_run():
         except IOError:
             abort(404, description="An error occurred while trying to open the image.")
 
+        mosaic_image_preview = MosaicPreviewImages.query.with_entities(MosaicPreviewImages.id).filter_by(project_id=current_project_id).first()
+        if mosaic_image_preview and len(mosaic_image_preview) > 0:
+            mosaic_image_preview_id = mosaic_image_preview[0]
+
+        mosaic_image = Mosaic.query.with_entities(Mosaic.id).filter_by(project_id=current_project_id).first()
+        if mosaic_image and len(mosaic_image) > 0:
+            mosaic_image_id = mosaic_image[0]
+
+        print("preview", mosaic_image_preview[0])
+        print("mosaic", mosaic_image[0])
+
     else:
         print("not generated")
 
-    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files)
+    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files, mosaic_image_preview_id=mosaic_image_preview_id, mosaic_image_id=mosaic_image_id)

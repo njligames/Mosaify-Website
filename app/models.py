@@ -60,4 +60,5 @@ class Mosaic(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    filename = db.Column(db.String, nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)

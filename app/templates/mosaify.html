@@ -174,6 +174,10 @@
         visibility: visible;
       }
 
+      .hide {
+        visibility: hidden;
+      }
+
       .spanner,
       .overlay {
         opacity: 0;
@@ -185,6 +189,11 @@
       .spanner.show,
       .overlay.show {
         opacity: 1;
+      }
+
+      .spanner.hide,
+      .overlay.hide {
+        opacity: 0;
       }
     </style>
   </head>
@@ -231,13 +240,14 @@
         </form>
         <div>
           <h1>Uploaded Tile Images</h1>
-          {% for file in files %}
+          <span>You have {{files|length}} mosaic tiles.</span>
+          <!-- {% for file in files %}
           <img
             src="{{ url_for('main.uploaded_tile_file', id=file) }}"
             alt="{{ file }}"
             style="max-width: 32px"
           />
-          {% endfor %}
+          {% endfor %} -->
         </div>
         <br />
         <a href="{{ url_for('main.list_files') }}">List uploaded files</a>
@@ -292,12 +302,45 @@
       <br />
       <br />
       <br />
+      <!-- Start Mosaic Result Images -->
+      <div>
+        <h2>Mosaic Results</h2>
+        <div>
+          <h1>Mosaic Preview Image</h1>
+          {% if mosaic_image_preview_id %}
+          <img
+            src="{{ url_for('main.uploaded_mosaic_image_preview_file', id=mosaic_image_preview_id) }}"
+            alt="{{ mosaic_image_preview_id }}"
+            style="max-width: 100%"
+          />
+          {% else %}
+          <div>No content to display</div>
+          {% endif %}
+        </div>
+        <div>
+          <h1>Mosaic Image</h1>
+          {% if mosaic_image_id %}
+          <img
+            src="{{ url_for('main.uploaded_mosaic_image_file', id=mosaic_image_id) }}"
+            alt="{{ mosaic_image_id }}"
+            style="max-width: 100%"
+          />
+          {% else %}
+          <div>No content to display</div>
+          {% endif %}
+        </div>
+        <br />
+        <!-- <a href="{{ url_for('main.list_files') }}">List uploaded files</a> -->
+      </div>
+      <!-- End Mosaic Result Images -->
     </div>
+
     <div class="overlay"></div>
     <div class="spanner">
       <div class="loader"></div>
       <p>Uploading music file, please be patient.</p>
     </div>
+
     <!-- Start Tile Images -->
     <script>
       let dropArea_tilearea = document.getElementById("drop-area-tilearea");
@@ -368,6 +411,8 @@
           if (response.ok) {
             window.location.href = "{{ url_for('main.mosaify') }}";
           } else {
+            $("div.spanner").addClass("hide");
+            $("div.overlay").addClass("hide");
             alert("Error uploading files");
           }
         });
