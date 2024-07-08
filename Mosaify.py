@@ -1,10 +1,16 @@
 
 from MosaifyPy import isDarwin
-from MosaifyPy import isLinux
 if isDarwin():
     import MosaifyPy_Darwin
+
+from MosaifyPy import isLinux
 if isLinux():
-    import MosaifyPy_Linux
+    import ctypes
+    import os
+    # Load the shared object file
+    so_file_path = os.path.join(os.path.dirname(__file__), './_MosaifyPy_Linux.so')
+    MosaifyPy_Linux = ctypes.CDLL(so_file_path)
+    # import MosaifyPy_Linux
 
 from PIL import Image
 import os
@@ -14,21 +20,29 @@ class Mosaify:
 	def __MosaifyPy(self):
 	    if isDarwin():
 	        return MosaifyPy_Darwin.Mosaify()
+	    if isLinux():
+	        return MosaifyPy_Linux.Mosaify()
 	    return None
 
 	def __getMosaicTilePreviewPath(self, _mosaic, _id):
 	    if isDarwin():
 	        return MosaifyPy_Darwin.getMosaicTilePreviewPath(_mosaic, _id)
+	    if isLinux():
+	        return MosaifyPy_Linux.getMosaicTilePreviewPath(_mosaic, _id)
 	    return ""
 
 	def __getMosaicPreviewPath(self, _mosaic):
 	    if isDarwin():
 	        return MosaifyPy_Darwin.getMosaicPreviewPath(_mosaic)
+	    if isLinux():
+	        return MosaifyPy_Linux.getMosaicPreviewPath(_mosaic)
 	    return ""
 
 	def __getMosaicPath(self, _mosaic):
 	    if isDarwin():
 	        return MosaifyPy_Darwin.getMosaicPath(_mosaic)
+	    if isLinux():
+	        return MosaifyPy_Linux.getMosaicPath(_mosaic)
 	    return ""
 
 	def __init__(self):
