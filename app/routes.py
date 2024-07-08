@@ -10,7 +10,7 @@ from app.models import MosaicTargetImages
 from app.models import MosaicPreviewImages
 from app.models import Mosaic
 
-import Mosaify
+from Mosaify import Mosaify
 
 from PIL import Image
 import mimetypes
@@ -22,8 +22,8 @@ import zlib
 from app.common import find_number_in_array
 
 
-import platform 
- 
+import platform
+
 print("Printing Platform")
 print(platform.uname())
 
@@ -93,11 +93,11 @@ def list_files():
 def uploaded_tile_file(id):
     # Query the MosaicTiles table for the data where the filename matches
     file_entry = MosaicTiles.query.filter_by(id=id).first()
-    
+
     if file_entry:
 
         d = zlib.decompress(file_entry.data)
-        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
         img.save(file_path)
 
@@ -109,7 +109,7 @@ def uploaded_tile_file(id):
 
         if None != file_data:
             mime_type = mimetypes.guess_type(file_entry.filename)[0]
-            
+
             if mime_type:
                 return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
             else:
@@ -124,11 +124,11 @@ def uploaded_tile_file(id):
 def uploaded_mosaic_image_preview_file(id):
     # Query the MosaicTiles table for the data where the filename matches
     file_entry = MosaicPreviewImages.query.filter_by(id=id).first()
-    
+
     if file_entry:
 
         d = zlib.decompress(file_entry.data)
-        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
         img.save(file_path)
 
@@ -140,7 +140,7 @@ def uploaded_mosaic_image_preview_file(id):
 
         if None != file_data:
             mime_type = mimetypes.guess_type(file_entry.filename)[0]
-            
+
             if mime_type:
                 return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
             else:
@@ -155,11 +155,11 @@ def uploaded_mosaic_image_preview_file(id):
 def uploaded_mosaic_image_file(id):
     # Query the MosaicTiles table for the data where the filename matches
     file_entry = Mosaic.query.filter_by(id=id).first()
-    
+
     if file_entry:
         if None != file_entry.data:
             mime_type = mimetypes.guess_type(file_entry.filename)[0]
-            
+
             if mime_type:
                 d = zlib.decompress(file_entry.data)
                 return send_file(io.BytesIO(d), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
@@ -175,11 +175,11 @@ def uploaded_mosaic_image_file(id):
 def uploaded_target_file(id):
     # Query the MosaicTiles table for the data where the filename matches
     file_entry = MosaicTargetImages.query.filter_by(id=id).first()
-    
+
     if file_entry:
 
         d = zlib.decompress(file_entry.data)
-        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d) 
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
         img.save(file_path)
 
@@ -191,7 +191,7 @@ def uploaded_target_file(id):
 
         if None != file_data:
             mime_type = mimetypes.guess_type(file_entry.filename)[0]
-            
+
             if mime_type:
                 return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
             else:

@@ -1,16 +1,10 @@
 
 from MosaifyPy import isDarwin
+from MosaifyPy import isLinux
 if isDarwin():
     import MosaifyPy_Darwin
-
-from MosaifyPy import isLinux
 if isLinux():
-    import ctypes
-    import os
-    # Load the shared object file
-    so_file_path = os.path.join(os.path.dirname(__file__), './_MosaifyPy_Linux.so')
-    MosaifyPy_Linux = ctypes.CDLL(so_file_path)
-    # import MosaifyPy_Linux
+    import MosaifyPy_Linux
 
 from PIL import Image
 import os
