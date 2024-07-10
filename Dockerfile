@@ -1,5 +1,5 @@
 # Use an official Ubuntu runtime as a parent image
-FROM ubuntu:24.04
+FROM ubuntu:20.04
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,21 +8,21 @@ ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 
-RUN apt-get update
-RUN apt-get install -y unzip wget build-essential checkinstall libx11-dev libxext-dev zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev
-# RUN apt-get build-dep imagemagick
-
-RUN apt-get update
-RUN apt-get dist-upgrade
-RUN apt-get install --reinstall tar
-
-RUN wget https://download.imagemagick.org/archive/ImageMagick-7.1.1-34.zip
-RUN unzip ImageMagick-7.1.1-34.zip
-WORKDIR ImageMagick-7.1.1-34
-RUN sh configure # (or configure or sudo configure)
-RUN make install
-RUN ldconfig /usr/local/lib # (or sudo ldconfig /usr/local/lib)
-WORKDIR ../
+# RUN apt-get update
+# RUN apt-get install -y unzip wget build-essential checkinstall libx11-dev libxext-dev zlib1g-dev libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev
+# # RUN apt-get build-dep imagemagick
+# 
+# RUN apt-get update
+# RUN apt-get dist-upgrade
+# RUN apt-get install --reinstall tar
+# 
+# RUN wget https://download.imagemagick.org/archive/ImageMagick-7.1.1-34.zip
+# RUN unzip ImageMagick-7.1.1-34.zip
+# WORKDIR ImageMagick-7.1.1-34
+# RUN sh configure # (or configure or sudo configure)
+# RUN make install
+# RUN ldconfig /usr/local/lib # (or sudo ldconfig /usr/local/lib)
+# WORKDIR ../
 
 # Install dependencies, including Python 3.11 and C++ standard libraries
 RUN apt-get update && \
@@ -43,8 +43,8 @@ RUN apt-get update && \
     gcc \
     g++ \
     swig \
-    # imagemagick \
-    # libmagick++-dev \
+    imagemagick \
+    libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment
