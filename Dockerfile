@@ -1,5 +1,5 @@
 # Use an official Ubuntu runtime as a parent image
-FROM ubuntu:22.04
+FROM ubuntu:18.04
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,7 +8,8 @@ ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install dependencies, including Python 3.11 and C++ standard libraries
-RUN apt-get update && \
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
+    apt-get update && \
     apt-get install -y \
     software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
@@ -19,7 +20,8 @@ RUN apt-get update && \
     python3.11-dev \
     python3-pip \
     build-essential \
-    g++-8 \
+    gcc-9 \
+    g++-9 \
     swig \
     libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
