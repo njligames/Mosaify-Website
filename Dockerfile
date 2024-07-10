@@ -26,6 +26,7 @@ RUN apt-get update && \
     gcc \
     g++ \
     swig \
+    imagemagick \
     libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
 
