@@ -8,8 +8,7 @@ ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install dependencies, including Python 3.11 and C++ standard libraries
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
     software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
