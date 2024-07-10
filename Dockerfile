@@ -1,5 +1,5 @@
 # Use an official Ubuntu runtime as a parent image
-FROM ubuntu:18.04
+FROM ubuntu:24.04
 
 # Set the working directory in the container
 WORKDIR /app
@@ -15,12 +15,16 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y \
     python3.11 \
-    python3.11-venv \
     python3.11-dev \
+    python3.11-venv \
+    python3.11-distutils \
+    python3.11-lib2to3 \
+    python3.11-gdbm \
+    python3.11-tk \
     python3-pip \
     build-essential \
-    gcc-9 \
-    g++-9 \
+    gcc \
+    g++ \
     swig \
     libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
