@@ -29,6 +29,8 @@ RUN apt-get update && \
     libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN conda install -c conda-forge imagemagick
+
 # Create a virtual environment
 RUN python3.11 -m venv /opt/venv
 
