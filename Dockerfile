@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && \
     apt-get install -y \
     swig \
-    imagemagick \
+    libmagick++-def \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the current directory contents into the container
