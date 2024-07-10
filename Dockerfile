@@ -43,8 +43,8 @@ RUN apt-get update && \
     gcc \
     g++ \
     swig \
-    imagemagick \
-    libmagick++-dev \
+    libmagick++-6.q16-dev \
+    libmagick++-6.q16-8 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment
