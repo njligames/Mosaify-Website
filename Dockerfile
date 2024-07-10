@@ -19,7 +19,7 @@ RUN apt-get update && \
     python3.11-dev \
     python3-pip \
     build-essential \
-    g++ \
+    g++-8 \
     swig \
     libmagick++-dev \
     && rm -rf /var/lib/apt/lists/*
