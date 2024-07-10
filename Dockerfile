@@ -1,22 +1,28 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Use an official Ubuntu runtime as a parent image
+FROM ubuntu:22.04
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Install additional dependencies
+# Install dependencies, including Python 3.11 and C++ standard libraries
 RUN apt-get update && \
     apt-get install -y \
+    software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
+    python3-pip \
     build-essential \
     g++ \
     swig \
     libmagick++-dev \
-    python3-venv \
-    libstdc++-8-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment
-RUN python3 -m venv /opt/venv
+RUN python3.11 -m venv /opt/venv
 
 # Activate the virtual environment and install dependencies
 ENV PATH="/opt/venv/bin:$PATH"
