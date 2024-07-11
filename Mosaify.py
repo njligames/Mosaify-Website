@@ -1,17 +1,10 @@
-
-import platform
-
-def isDarwin():
-    return "Darwin" == platform.uname().system
-
-def isLinux():
-    return "Linux" == platform.uname().system
-
-
+from MosaifyPy import isDarwin
 if isDarwin():
-    import Mosaify.MosaifyPy_Darwin
+    import MosaifyPy_Darwin
+
+from MosaifyPy import isLinux
 if isLinux():
-    import Mosaify.MosaifyPy_Linux
+    import MosaifyPy_Linux
 
 from PIL import Image
 import os

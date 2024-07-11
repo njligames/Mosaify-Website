@@ -10,7 +10,7 @@ from app.models import MosaicTargetImages
 from app.models import MosaicPreviewImages
 from app.models import Mosaic
 
-from Mosaify import Mosaify
+import Mosaify
 
 from PIL import Image
 import mimetypes
@@ -85,6 +85,10 @@ def list_files():
     # Extract filenames from the result tuples
     files = [file.filename for file in filenames]
     files.sort()
+
+    current_project_id = session['current_project_id']
+    filenames = MosaicTiles.query.with_entities(MosaicTiles.filename, MosaicTiles.id).filter_by(project_id=current_project_id).all()
+    files = [file.id for file in filenames]
 
     return render_template('list.html', files=files)
 
@@ -375,6 +379,7 @@ def mosaify_run():
 
     queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
 
+    print(Mosaify)
     mosaify = Mosaify.Mosaify()
     mosaify.setTileSize(8)
     for id, filename, data, rows, cols, comps in queried_data:
@@ -456,12 +461,12 @@ def mosaify_run():
         if mosaic_image_preview and len(mosaic_image_preview) > 0:
             mosaic_image_preview_id = mosaic_image_preview[0]
 
-        mosaic_image = Mosaic.query.with_entities(Mosaic.id).filter_by(project_id=current_project_id).first()
-        if mosaic_image and len(mosaic_image) > 0:
-            mosaic_image_id = mosaic_image[0]
+        # mosaic_image = Mosaic.query.with_entities(Mosaic.id).filter_by(project_id=current_project_id).first()
+        # if mosaic_image and len(mosaic_image) > 0:
+        #     mosaic_image_id = mosaic_image[0]
 
         print("preview", mosaic_image_preview[0])
-        print("mosaic", mosaic_image[0])
+        # print("mosaic", mosaic_image[0])
 
     else:
         print("not generated")
