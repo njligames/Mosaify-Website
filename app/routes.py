@@ -24,8 +24,8 @@ from app.common import find_number_in_array
 
 import platform
 
-print("Printing Platform")
-print(platform.uname())
+# print("Printing Platform")
+# print(platform.uname())
 
 main = Blueprint('main', __name__)
 
@@ -354,6 +354,7 @@ def load_current_project():
 @main.route('/mosaify_run')
 @login_required
 def mosaify_run():
+    print("Mosaify - mosaify_run")
 
     fileids = MosaicTiles.query.with_entities(MosaicTiles.id).all()
     files = [file.id for file in fileids]
@@ -379,7 +380,6 @@ def mosaify_run():
 
     queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
 
-    print(Mosaify)
     mosaify = Mosaify.Mosaify()
     mosaify.setTileSize(8)
     for id, filename, data, rows, cols, comps in queried_data:
