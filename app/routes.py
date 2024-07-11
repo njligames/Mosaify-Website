@@ -264,7 +264,7 @@ def upload_tilefiles():
     files = request.files.getlist('files[]')
     for file in files:
         if file:
-            filename = file.filename
+            filename = os.path.basename(file.filename)
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
@@ -291,9 +291,10 @@ def upload_tilefiles():
                     # Add the new file to the session and commit
                     db.session.add(new_file)
                     db.session.commit()
-                os.remove(file_path)
             except IOError:
                 print("An error occurred while trying to open the image.")
+
+            os.remove(file_path)
 
     return redirect(url_for('main.mosaify'))
 
@@ -303,7 +304,7 @@ def upload_targetfiles():
     files = request.files.getlist('files[]')
     for file in files:
         if file:
-            filename = file.filename
+            filename = os.path.basename(file.filename)
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
 
@@ -330,11 +331,10 @@ def upload_targetfiles():
                     # Add the new file to the session and commit
                     db.session.add(new_file)
                     db.session.commit()
-
-                os.remove(file_path)
-
             except IOError:
                 print("An error occurred while trying to open the image.")
+
+            os.remove(file_path)
 
     return redirect(url_for('main.mosaify'))
 
@@ -423,7 +423,7 @@ def mosaify_run():
                 new_file = MosaicPreviewImages(
                     project_id=current_project_id,  # You need to set the appropriate project_id here
                     user_id=current_user.id,
-                    filename=preview_path,
+                    filename=os.path.basename(preview_path),
                     data=zlib.compress(data),
                     rows=rows,
                     cols=cols,
@@ -434,7 +434,7 @@ def mosaify_run():
                 db.session.add(new_file)
                 db.session.commit()
 
-            # print(preview_path)
+            # print("preview_path", preview_path)
             os.remove(preview_path)
 
             with open(main_path, 'rb') as f:
@@ -444,7 +444,7 @@ def mosaify_run():
                 #     project_id=current_project_id,  # You need to set the appropriate project_id here
                 #     user_id=current_user.id,
                 #     data=zlib.compress(data),
-                #     filename=main_path
+                #     filename=os.path.basename(main_path)
                 # )
 
                 # # Add the new file to the session and commit
