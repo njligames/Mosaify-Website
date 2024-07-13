@@ -24,6 +24,9 @@ from app.common import find_number_in_array
 
 import platform
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 # print("Printing Platform")
 # print(platform.uname())
 
@@ -351,10 +354,12 @@ def load_current_project():
     else:
         g.current_project = None
 
-@main.route('/mosaify_run')
+# @main.route('/mosaify_run')
+@main.route('/mosaify_run', methods=['GET'])
 @login_required
 def mosaify_run():
     print("Mosaify - mosaify_run")
+    current_app.logger.debug('** Mosaify - mosaify_run')
 
     fileids = MosaicTiles.query.with_entities(MosaicTiles.id).all()
     files = [file.id for file in fileids]
@@ -409,7 +414,7 @@ def mosaify_run():
     d = zlib.decompress(my_target.data)
     if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d):
         preview_path = mosaify.getMosaicPreviewPath()
-        main_path = mosaify.getMosaicPath()
+        # main_path = mosaify.getMosaicPath()
         print('Mosaic was generated SUCCESSFULLY')
 
         try:
@@ -437,22 +442,22 @@ def mosaify_run():
             # print("preview_path", preview_path)
             os.remove(preview_path)
 
-            with open(main_path, 'rb') as f:
-                data = f.read()
+            # with open(main_path, 'rb') as f:
+            #     data = f.read()
 
-                # new_file = Mosaic(
-                #     project_id=current_project_id,  # You need to set the appropriate project_id here
-                #     user_id=current_user.id,
-                #     data=zlib.compress(data),
-                #     filename=os.path.basename(main_path)
-                # )
+            #     new_file = Mosaic(
+            #         project_id=current_project_id,  # You need to set the appropriate project_id here
+            #         user_id=current_user.id,
+            #         data=zlib.compress(data),
+            #         filename=os.path.basename(main_path)
+            #     )
 
-                # # Add the new file to the session and commit
-                # db.session.add(new_file)
-                # db.session.commit()
+            #     # Add the new file to the session and commit
+            #     db.session.add(new_file)
+            #     db.session.commit()
 
-            # print(main_path)
-            os.remove(main_path)
+            # # print(main_path)
+            # os.remove(main_path)
 
         except IOError:
             abort(404, description="An error occurred while trying to open the image.")

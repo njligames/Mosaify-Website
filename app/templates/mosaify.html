@@ -297,7 +297,11 @@
       </div>
       <!-- End Target Images -->
       <br />
-      <a href="{{ url_for('main.mosaify_run') }}">Create Mosaic</a>
+      <div id="upload-area-tilearea">
+        <button type="button" onclick="generateMosaic()">Create Mosaic</button>
+        <!-- <div id="gallery-tilearea"></div> -->
+      </div>
+      <!-- <a href="{{ url_for('main.mosaify_run') }}">Create Mosaic</a> -->
       <br />
       <br />
       <br />
@@ -392,6 +396,30 @@
           let img = document.createElement("img");
           img.src = URL.createObjectURL(file);
           gallery_tilearea.appendChild(img);
+        });
+      }
+
+      function generateMosaic() {
+        $("div.spanner").addClass("show");
+        $("div.overlay").addClass("show");
+
+        // let formData = new FormData();
+        // filesToUpload_tilearea.forEach((file) => {
+        //   formData.append("files[]", file);
+        // });
+
+        alert("fetching...");
+        fetch("{{ url_for('main.mosaify_run') }}", {
+          method: "GET",
+        }).then((response) => {
+          alert("got a response...");
+          if (response.ok) {
+            window.location.href = "{{ url_for('main.mosaify') }}";
+          } else {
+            $("div.spanner").addClass("hide");
+            $("div.overlay").addClass("hide");
+            alert("Error uploading files");
+          }
         });
       }
 
