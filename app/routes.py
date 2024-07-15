@@ -476,4 +476,5 @@ def mosaify_run():
     else:
         print("not generated")
 
-    return render_template('mosaify.html', projects=projects, files=files, target_files=target_files, mosaic_image_preview_id=mosaic_image_preview_id, mosaic_image_id=mosaic_image_id)
+    # return render_template('mosaify.html', projects=projects, files=files, target_files=target_files, mosaic_image_preview_id=mosaic_image_preview_id, mosaic_image_id=mosaic_image_id)
+    return redirect(url_for('main.mosaify'))
