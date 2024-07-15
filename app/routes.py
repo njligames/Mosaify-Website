@@ -211,6 +211,7 @@ def uploaded_target_file(id):
 @main.route('/mosaify')
 @login_required
 def mosaify():
+    print("enter mosaify")
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
     projects = [proj.id for proj in all_projects]
 
@@ -231,6 +232,7 @@ def mosaify():
     if mosaic_image and len(mosaic_image) > 0:
         mosaic_image_id = mosaic_image[0]
 
+    print("exit mosaify")
     return render_template('mosaify.html', projects=projects, files=files, target_files=target_files, mosaic_image_preview_id=mosaic_image_preview_id, mosaic_image_id=mosaic_image_id)
 
 @main.route('/mosaify_previous/<project_id>')
