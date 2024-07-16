@@ -414,9 +414,11 @@
           if (response.ok) {
             window.location.href = "{{ url_for('main.mosaify') }}";
           } else {
+            response.text().then((text) => {
+              alert("Error: " + text);
+            });
             $("div.spanner").addClass("hide");
             $("div.overlay").addClass("hide");
-            alert(response.json);
           }
         });
       }
