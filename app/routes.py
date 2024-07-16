@@ -360,40 +360,52 @@ def load_current_project():
 @main.route('/mosaify_run', methods=['GET'])
 @login_required
 def mosaify_run():
-    print("Mosaify - mosaify_run")
     current_app.logger.debug('** Mosaify - mosaify_run')
 
     fileids = MosaicTiles.query.with_entities(MosaicTiles.id).all()
+    current_app.logger.debug('1')
     files = [file.id for file in fileids]
+    current_app.logger.debug('2')
 
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
+    current_app.logger.debug('3')
     projects = [proj.id for proj in all_projects]
+    current_app.logger.debug('4')
 
     target_files = []
+    current_app.logger.debug('5')
 
     current_project_id = session['current_project_id']
+    current_app.logger.debug('6')
 
     target_queried_data = MosaicTargetImages.query.with_entities(MosaicTargetImages.id, MosaicTargetImages.filename, MosaicTargetImages.data, MosaicTargetImages.rows, MosaicTargetImages.cols, MosaicTargetImages.comps).filter_by(project_id=current_project_id).all()
+    current_app.logger.debug('7')
     # There really should only be one.
 
     if len(target_queried_data) == 0:
         abort(404, description="No Target Found.")
+    current_app.logger.debug('8')
 
     my_target = target_queried_data[0]
+    current_app.logger.debug('9')
 
     # print(my_target)
 
     target_files.append(my_target.id)
+    current_app.logger.debug('10')
 
     queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
+    current_app.logger.debug('11')
 
     mosaify = Mosaify.Mosaify()
+    current_app.logger.debug('12')
     mosaify.setTileSize(8)
+    current_app.logger.debug('13')
     for id, filename, data, rows, cols, comps in queried_data:
         d = zlib.decompress(data)
         mosaify.addTileImage(cols, rows, comps, d, filename, id)
+    current_app.logger.debug('14')
 
-    print("Generating the Mosaic...")
 
     # entries = MosaicPreviewImages.query(MosaicPreviewImages).filter(MosaicPreviewImages.project_id == current_project_id).all()
     entries = MosaicPreviewImages.query.filter_by(project_id=current_project_id).all()
@@ -402,6 +414,7 @@ def mosaify_run():
             # If an entry is found, delete it
             db.session.delete(entry)
             db.session.commit()
+    current_app.logger.debug('15')
 
     # entries = Mosaic.query(Mosaic).filter(Mosaic.project_id == current_project_id).all()
     entries = Mosaic.query.filter_by(project_id=current_project_id).all()
@@ -410,17 +423,22 @@ def mosaify_run():
             # If an entry is found, delete it
             db.session.delete(entry)
             db.session.commit()
+    current_app.logger.debug('16')
 
     mosaic_image_preview_id = None
     mosaic_image_id = None
     d = zlib.decompress(my_target.data)
+    current_app.logger.debug('17')
     if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d):
+        current_app.logger.debug('18')
         preview_path = mosaify.getMosaicPreviewPath()
+        current_app.logger.debug('19')
+        current_app.logger.debug(preview_path)
         # main_path = mosaify.getMosaicPath()
-        print('Mosaic was generated SUCCESSFULLY')
 
         try:
             with Image.open(preview_path) as im:
+                current_app.logger.debug('20')
                 # Process the image here
                 im = im.convert('RGB')
                 data = im.tobytes()
@@ -463,6 +481,8 @@ def mosaify_run():
 
         except IOError:
             abort(404, description="An error occurred while trying to open the image.")
+        except Exception as e:
+            abort(404, description=repr(e))
 
         mosaic_image_preview = MosaicPreviewImages.query.with_entities(MosaicPreviewImages.id).filter_by(project_id=current_project_id).first()
         if mosaic_image_preview and len(mosaic_image_preview) > 0:

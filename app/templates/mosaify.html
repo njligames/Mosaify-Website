@@ -408,17 +408,15 @@
         //   formData.append("files[]", file);
         // });
 
-        alert("fetching...");
         fetch("{{ url_for('main.mosaify_run') }}", {
           method: "GET",
         }).then((response) => {
-          alert("got a response...");
           if (response.ok) {
             window.location.href = "{{ url_for('main.mosaify') }}";
           } else {
             $("div.spanner").addClass("hide");
             $("div.overlay").addClass("hide");
-            alert("Error uploading files");
+            alert(response.statusText);
           }
         });
       }

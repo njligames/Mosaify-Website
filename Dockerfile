@@ -1,6 +1,9 @@
 # Use an official Ubuntu runtime as a parent image
 FROM ubuntu:20.04
 
+# Make sure the /tmp directory exists and is writable
+RUN mkdir -p /tmp && chmod 1777 /tmp
+
 # Set the working directory in the container
 WORKDIR /app
 
