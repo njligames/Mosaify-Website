@@ -415,7 +415,11 @@
             window.location.href = "{{ url_for('main.mosaify') }}";
           } else {
             response.text().then((text) => {
-              alert("Error: " + text);
+              if (text) {
+                alert("Error: " + text);
+              } else {
+                alert("Error: " + response.status + " " + response.statusText);
+              }
             });
             $("div.spanner").addClass("hide");
             $("div.overlay").addClass("hide");
