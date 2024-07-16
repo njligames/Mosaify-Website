@@ -416,7 +416,8 @@
           } else {
             $("div.spanner").addClass("hide");
             $("div.overlay").addClass("hide");
-            alert(response.text());
+            const data = await response.json()
+            alert(data);
           }
         });
       }
