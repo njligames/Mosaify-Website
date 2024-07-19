@@ -64,5 +64,7 @@ COPY . /app
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
+COPY gunicorn.conf.py /
+
 # Run the application using Gunicorn
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "--bind", "0.0.0.0", "wsgi:app"]
