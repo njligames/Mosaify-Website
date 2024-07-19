@@ -41,11 +41,9 @@ class Mosaify:
 
 	def __init__(self):
 
-		print("Mosaify - __init__")
 		self.mosaic = self.__MosaifyPy()
 
 	def setTileSize(self, side):
-		print("Mosaify - setTileSize")
 		self.mosaic.setTileSize(side)
 
 	def __pil_image(self, path):
@@ -60,11 +58,9 @@ class Mosaify:
 	    return cols, rows, comp, imgdata
 
 	def addTileImage(self, width, height, comp, imgdata, path, _id):
-		print("Mosaify - addTileImage")
 		self.mosaic.addTileImage(width, height, comp, imgdata, path, _id)
 
 	def addTile(self, _id, path):
-		print("Mosaify - addTile")
 		width, height, comp, imgdata = self.__pil_image(path)
 
 		self.mosaic.addTileImage(width, height, comp, imgdata, path, _id)
@@ -91,7 +87,6 @@ class Mosaify:
 		return image
 
 	def generate(self, width, height, comp, imgdata):
-		print("Mosaify - generate")
 		# width, height, comp, imgdata = self.__pil_image(path)
 		return self.mosaic.generate(width, height, comp, imgdata)
 

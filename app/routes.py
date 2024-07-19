@@ -429,7 +429,16 @@ def mosaify_run():
     mosaic_image_id = None
     d = zlib.decompress(my_target.data)
     current_app.logger.debug('17')
-    if mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d):
+
+    success = False
+    try:
+        success = mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d)
+    except RuntimeError as e:
+        abort(404, description=repr(e))
+    except:
+        abort(404, description="unknown error")
+
+    if success:
         current_app.logger.debug('18')
         preview_path = mosaify.getMosaicPreviewPath()
         current_app.logger.debug('19')
