@@ -10,7 +10,8 @@ from app.models import MosaicTargetImages
 from app.models import MosaicPreviewImages
 from app.models import Mosaic
 
-import Mosaify
+from MosaifyPy import Image
+from MosaifyPy import MosaifyPy
 
 from PIL import Image
 import mimetypes
@@ -397,7 +398,7 @@ def mosaify_run():
     queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
     current_app.logger.debug('11')
 
-    mosaify = Mosaify.Mosaify()
+    mosaify = MosaifyPy()
     current_app.logger.debug('12')
     mosaify.setTileSize(8)
     current_app.logger.debug('13')
@@ -432,6 +433,8 @@ def mosaify_run():
 
     success = False
     try:
+        current_app.logger.debug(f'The amount of threads being used is {mosaify.getMaxThreads()}')
+        current_app.logger.debug("starting to generate...")
         success = mosaify.generate(my_target.rows, my_target.cols, my_target.comps, d)
     except RuntimeError as e:
         abort(404, description=repr(e))

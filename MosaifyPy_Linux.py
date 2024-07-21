@@ -90,6 +90,9 @@ class Mosaify(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
+    def getMaxThreads(self):
+        return _MosaifyPy_Linux.Mosaify_getMaxThreads(self)
+
     def __init__(self):
         _MosaifyPy_Linux.Mosaify_swiginit(self, _MosaifyPy_Linux.new_Mosaify())
     __swig_destroy__ = _MosaifyPy_Linux.delete_Mosaify
@@ -135,6 +138,89 @@ class Mosaify(object):
 
 # Register Mosaify in _MosaifyPy_Linux:
 _MosaifyPy_Linux.Mosaify_swigregister(Mosaify)
+
+class Image(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _MosaifyPy_Linux.delete_Image
+
+    def __init__(self, *args):
+        _MosaifyPy_Linux.Image_swiginit(self, _MosaifyPy_Linux.new_Image(*args))
+
+    def setPixel(self, *args):
+        return _MosaifyPy_Linux.Image_setPixel(self, *args)
+
+    def getPixel(self, *args):
+        return _MosaifyPy_Linux.Image_getPixel(self, *args)
+
+    def setPixels(self, *args):
+        return _MosaifyPy_Linux.Image_setPixels(self, *args)
+
+    def getNumberOfComponents(self):
+        return _MosaifyPy_Linux.Image_getNumberOfComponents(self)
+
+    def getWidth(self):
+        return _MosaifyPy_Linux.Image_getWidth(self)
+
+    def getHeight(self):
+        return _MosaifyPy_Linux.Image_getHeight(self)
+
+    def getFilename(self):
+        return _MosaifyPy_Linux.Image_getFilename(self)
+
+    def getBytesPerPixel(self):
+        return _MosaifyPy_Linux.Image_getBytesPerPixel(self)
+
+    def getDataPtr(self):
+        return _MosaifyPy_Linux.Image_getDataPtr(self)
+
+    def getDataSize(self):
+        return _MosaifyPy_Linux.Image_getDataSize(self)
+
+    def generate(self, *args):
+        return _MosaifyPy_Linux.Image_generate(self, *args)
+
+    def drawLine(self, *args):
+        return _MosaifyPy_Linux.Image_drawLine(self, *args)
+
+    def blur(self):
+        return _MosaifyPy_Linux.Image_blur(self)
+
+    def setAlpha(self, *args):
+        return _MosaifyPy_Linux.Image_setAlpha(self, *args)
+
+    def hasAlpha(self):
+        return _MosaifyPy_Linux.Image_hasAlpha(self)
+
+    def preMultiplyAlpha(self):
+        return _MosaifyPy_Linux.Image_preMultiplyAlpha(self)
+
+    def flip(self):
+        return _MosaifyPy_Linux.Image_flip(self)
+
+    def rotate(self):
+        return _MosaifyPy_Linux.Image_rotate(self)
+
+    def resize(self, *args):
+        return _MosaifyPy_Linux.Image_resize(self, *args)
+
+    def clip(self, x, y, width, height):
+        return _MosaifyPy_Linux.Image_clip(self, x, y, width, height)
+
+    def isWidthHeightPowerOf2(self):
+        return _MosaifyPy_Linux.Image_isWidthHeightPowerOf2(self)
+
+    def copyData(self, dataPtr, width, height, components, filename):
+        return _MosaifyPy_Linux.Image_copyData(self, dataPtr, width, height, components, filename)
+
+    def setId(self, _id):
+        return _MosaifyPy_Linux.Image_setId(self, _id)
+
+    def getId(self):
+        return _MosaifyPy_Linux.Image_getId(self)
+
+# Register Image in _MosaifyPy_Linux:
+_MosaifyPy_Linux.Image_swigregister(Image)
 
 
 def getMosaicPath(mosaify):

@@ -80,6 +80,9 @@ class Mosaify(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
+    def getMaxThreads(self):
+        return _MosaifyPy_Darwin.Mosaify_getMaxThreads(self)
+
     def __init__(self):
         _MosaifyPy_Darwin.Mosaify_swiginit(self, _MosaifyPy_Darwin.new_Mosaify())
     __swig_destroy__ = _MosaifyPy_Darwin.delete_Mosaify
@@ -125,6 +128,88 @@ class Mosaify(object):
 
 # Register Mosaify in _MosaifyPy_Darwin:
 _MosaifyPy_Darwin.Mosaify_swigregister(Mosaify)
+class Image(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _MosaifyPy_Darwin.delete_Image
+
+    def __init__(self, *args):
+        _MosaifyPy_Darwin.Image_swiginit(self, _MosaifyPy_Darwin.new_Image(*args))
+
+    def setPixel(self, *args):
+        return _MosaifyPy_Darwin.Image_setPixel(self, *args)
+
+    def getPixel(self, *args):
+        return _MosaifyPy_Darwin.Image_getPixel(self, *args)
+
+    def setPixels(self, *args):
+        return _MosaifyPy_Darwin.Image_setPixels(self, *args)
+
+    def getNumberOfComponents(self):
+        return _MosaifyPy_Darwin.Image_getNumberOfComponents(self)
+
+    def getWidth(self):
+        return _MosaifyPy_Darwin.Image_getWidth(self)
+
+    def getHeight(self):
+        return _MosaifyPy_Darwin.Image_getHeight(self)
+
+    def getFilename(self):
+        return _MosaifyPy_Darwin.Image_getFilename(self)
+
+    def getBytesPerPixel(self):
+        return _MosaifyPy_Darwin.Image_getBytesPerPixel(self)
+
+    def getDataPtr(self):
+        return _MosaifyPy_Darwin.Image_getDataPtr(self)
+
+    def getDataSize(self):
+        return _MosaifyPy_Darwin.Image_getDataSize(self)
+
+    def generate(self, *args):
+        return _MosaifyPy_Darwin.Image_generate(self, *args)
+
+    def drawLine(self, *args):
+        return _MosaifyPy_Darwin.Image_drawLine(self, *args)
+
+    def blur(self):
+        return _MosaifyPy_Darwin.Image_blur(self)
+
+    def setAlpha(self, *args):
+        return _MosaifyPy_Darwin.Image_setAlpha(self, *args)
+
+    def hasAlpha(self):
+        return _MosaifyPy_Darwin.Image_hasAlpha(self)
+
+    def preMultiplyAlpha(self):
+        return _MosaifyPy_Darwin.Image_preMultiplyAlpha(self)
+
+    def flip(self):
+        return _MosaifyPy_Darwin.Image_flip(self)
+
+    def rotate(self):
+        return _MosaifyPy_Darwin.Image_rotate(self)
+
+    def resize(self, *args):
+        return _MosaifyPy_Darwin.Image_resize(self, *args)
+
+    def clip(self, x, y, width, height):
+        return _MosaifyPy_Darwin.Image_clip(self, x, y, width, height)
+
+    def isWidthHeightPowerOf2(self):
+        return _MosaifyPy_Darwin.Image_isWidthHeightPowerOf2(self)
+
+    def copyData(self, dataPtr, width, height, components, filename):
+        return _MosaifyPy_Darwin.Image_copyData(self, dataPtr, width, height, components, filename)
+
+    def setId(self, _id):
+        return _MosaifyPy_Darwin.Image_setId(self, _id)
+
+    def getId(self):
+        return _MosaifyPy_Darwin.Image_getId(self)
+
+# Register Image in _MosaifyPy_Darwin:
+_MosaifyPy_Darwin.Image_swigregister(Image)
 
 def getMosaicPath(mosaify):
     return _MosaifyPy_Darwin.getMosaicPath(mosaify)
