@@ -153,4 +153,3 @@ class MosaifyPy:
 		return _getMosaicPath(self.mosaic)
 	
 
-
