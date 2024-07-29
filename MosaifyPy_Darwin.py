@@ -76,6 +76,20 @@ class ImageFileLoader(object):
 
 # Register ImageFileLoader in _MosaifyPy_Darwin:
 _MosaifyPy_Darwin.ImageFileLoader_swigregister(ImageFileLoader)
+class RegionOfInterest(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self, *args):
+        _MosaifyPy_Darwin.RegionOfInterest_swiginit(self, _MosaifyPy_Darwin.new_RegionOfInterest(*args))
+    x = property(_MosaifyPy_Darwin.RegionOfInterest_x_get, _MosaifyPy_Darwin.RegionOfInterest_x_set)
+    y = property(_MosaifyPy_Darwin.RegionOfInterest_y_get, _MosaifyPy_Darwin.RegionOfInterest_y_set)
+    width = property(_MosaifyPy_Darwin.RegionOfInterest_width_get, _MosaifyPy_Darwin.RegionOfInterest_width_set)
+    height = property(_MosaifyPy_Darwin.RegionOfInterest_height_get, _MosaifyPy_Darwin.RegionOfInterest_height_set)
+    __swig_destroy__ = _MosaifyPy_Darwin.delete_RegionOfInterest
+
+# Register RegionOfInterest in _MosaifyPy_Darwin:
+_MosaifyPy_Darwin.RegionOfInterest_swigregister(RegionOfInterest)
 class Mosaify(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -99,6 +113,12 @@ class Mosaify(object):
     def getTileSize(self):
         return _MosaifyPy_Darwin.Mosaify_getTileSize(self)
 
+    def setPatchSize(self, size):
+        return _MosaifyPy_Darwin.Mosaify_setPatchSize(self, size)
+
+    def getPatchSize(self):
+        return _MosaifyPy_Darwin.Mosaify_getPatchSize(self)
+
     def addTileImage(self, width, height, components, data, filepath, id):
         return _MosaifyPy_Darwin.Mosaify_addTileImage(self, width, height, components, data, filepath, id)
 
@@ -114,6 +134,12 @@ class Mosaify(object):
     def updateTileImage(self, width, height, components, data, filepath, id):
         return _MosaifyPy_Darwin.Mosaify_updateTileImage(self, width, height, components, data, filepath, id)
 
+    def updateTileROI(self, x, y, width, height, id):
+        return _MosaifyPy_Darwin.Mosaify_updateTileROI(self, x, y, width, height, id)
+
+    def getTileROI(self, id):
+        return _MosaifyPy_Darwin.Mosaify_getTileROI(self, id)
+
     def generate(self, width, height, components, data):
         return _MosaifyPy_Darwin.Mosaify_generate(self, width, height, components, data)
 
@@ -125,6 +151,10 @@ class Mosaify(object):
 
     def getMosaicMap(self, *args):
         return _MosaifyPy_Darwin.Mosaify_getMosaicMap(self, *args)
+
+    @staticmethod
+    def scaleNumber(scaleMax, inputMax, inputNumber):
+        return _MosaifyPy_Darwin.Mosaify_scaleNumber(scaleMax, inputMax, inputNumber)
 
 # Register Mosaify in _MosaifyPy_Darwin:
 _MosaifyPy_Darwin.Mosaify_swigregister(Mosaify)
@@ -193,8 +223,8 @@ class Image(object):
     def resize(self, *args):
         return _MosaifyPy_Darwin.Image_resize(self, *args)
 
-    def clip(self, x, y, width, height):
-        return _MosaifyPy_Darwin.Image_clip(self, x, y, width, height)
+    def clip(self, *args):
+        return _MosaifyPy_Darwin.Image_clip(self, *args)
 
     def isWidthHeightPowerOf2(self):
         return _MosaifyPy_Darwin.Image_isWidthHeightPowerOf2(self)

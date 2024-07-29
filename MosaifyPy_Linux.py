@@ -86,6 +86,21 @@ def ImageFileLoader_load(filename):
 def ImageFileLoader_write(filename, img):
     return _MosaifyPy_Linux.ImageFileLoader_write(filename, img)
 
+class RegionOfInterest(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self, *args):
+        _MosaifyPy_Linux.RegionOfInterest_swiginit(self, _MosaifyPy_Linux.new_RegionOfInterest(*args))
+    x = property(_MosaifyPy_Linux.RegionOfInterest_x_get, _MosaifyPy_Linux.RegionOfInterest_x_set)
+    y = property(_MosaifyPy_Linux.RegionOfInterest_y_get, _MosaifyPy_Linux.RegionOfInterest_y_set)
+    width = property(_MosaifyPy_Linux.RegionOfInterest_width_get, _MosaifyPy_Linux.RegionOfInterest_width_set)
+    height = property(_MosaifyPy_Linux.RegionOfInterest_height_get, _MosaifyPy_Linux.RegionOfInterest_height_set)
+    __swig_destroy__ = _MosaifyPy_Linux.delete_RegionOfInterest
+
+# Register RegionOfInterest in _MosaifyPy_Linux:
+_MosaifyPy_Linux.RegionOfInterest_swigregister(RegionOfInterest)
+
 class Mosaify(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -109,6 +124,12 @@ class Mosaify(object):
     def getTileSize(self):
         return _MosaifyPy_Linux.Mosaify_getTileSize(self)
 
+    def setPatchSize(self, size):
+        return _MosaifyPy_Linux.Mosaify_setPatchSize(self, size)
+
+    def getPatchSize(self):
+        return _MosaifyPy_Linux.Mosaify_getPatchSize(self)
+
     def addTileImage(self, width, height, components, data, filepath, id):
         return _MosaifyPy_Linux.Mosaify_addTileImage(self, width, height, components, data, filepath, id)
 
@@ -124,6 +145,12 @@ class Mosaify(object):
     def updateTileImage(self, width, height, components, data, filepath, id):
         return _MosaifyPy_Linux.Mosaify_updateTileImage(self, width, height, components, data, filepath, id)
 
+    def updateTileROI(self, x, y, width, height, id):
+        return _MosaifyPy_Linux.Mosaify_updateTileROI(self, x, y, width, height, id)
+
+    def getTileROI(self, id):
+        return _MosaifyPy_Linux.Mosaify_getTileROI(self, id)
+
     def generate(self, width, height, components, data):
         return _MosaifyPy_Linux.Mosaify_generate(self, width, height, components, data)
 
@@ -136,8 +163,15 @@ class Mosaify(object):
     def getMosaicMap(self, *args):
         return _MosaifyPy_Linux.Mosaify_getMosaicMap(self, *args)
 
+    @staticmethod
+    def scaleNumber(scaleMax, inputMax, inputNumber):
+        return _MosaifyPy_Linux.Mosaify_scaleNumber(scaleMax, inputMax, inputNumber)
+
 # Register Mosaify in _MosaifyPy_Linux:
 _MosaifyPy_Linux.Mosaify_swigregister(Mosaify)
+
+def Mosaify_scaleNumber(scaleMax, inputMax, inputNumber):
+    return _MosaifyPy_Linux.Mosaify_scaleNumber(scaleMax, inputMax, inputNumber)
 
 class Image(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
@@ -204,8 +238,8 @@ class Image(object):
     def resize(self, *args):
         return _MosaifyPy_Linux.Image_resize(self, *args)
 
-    def clip(self, x, y, width, height):
-        return _MosaifyPy_Linux.Image_clip(self, x, y, width, height)
+    def clip(self, *args):
+        return _MosaifyPy_Linux.Image_clip(self, *args)
 
     def isWidthHeightPowerOf2(self):
         return _MosaifyPy_Linux.Image_isWidthHeightPowerOf2(self)
