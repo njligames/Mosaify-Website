@@ -2,6 +2,25 @@
 <html lang="en">
   <head>
     <title>Uploaded Images</title>
+    <script>
+      function deleteImage(imageId) {
+        fetch(`/delete_tileimage/${imageId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Remove the image from the gallery
+              document.getElementById(`file-${imageId}`).remove();
+            } else {
+              alert(data.message);
+            }
+          });
+      }
+    </script>
   </head>
   <body>
     <div>
@@ -9,12 +28,15 @@
       <ul>
         {% for file in files %}
         <li>
-          <img
-            src="{{ url_for('main.uploaded_tile_file', id=file) }}"
-            alt="{{ file }}"
-            style="max-width: 200px"
-          />
-          <p>{{ file }}</p>
+          <div id="file-{{ file }}">
+            <img
+              src="{{ url_for('main.uploaded_tile_file', id=file) }}"
+              alt="{{ file }}"
+              style="max-width: 200px"
+            />
+            <p>{{ file }}</p>
+            <button onclick="deleteImage({{ file }})">Delete</button>
+          </div>
         </li>
         {% endfor %}
       </ul>

@@ -1,6 +1,6 @@
 # app/routes.py
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, current_app, abort, session, g
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, current_app, abort, session, g, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
 from app import db, bcrypt
 from app.models import User
@@ -263,6 +263,17 @@ def mosaify_new():
     session['current_project_id'] = new_project.id
 
     return render_template('mosaify.html')
+
+@main.route('/delete_tileimage/<int:image_id>', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    image = MosaicTiles.query.get(image_id)
+    if image:
+        db.session.delete(image)
+        db.session.commit()
+        return jsonify(success=True), 200
+    else:
+        return jsonify(success=False, message="Image not found"), 404
 
 @main.route('/upload_tilefiles', methods=['POST'])
 @login_required
