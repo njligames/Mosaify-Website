@@ -315,6 +315,18 @@ def upload_tilefiles():
 
     return redirect(url_for('main.mosaify'))
 
+
+@main.route('/delete_targetimage/<int:image_id>', methods=['POST'])
+@login_required
+def delete_target_image(image_id):
+    image = MosaicTargetImages.query.get(image_id)
+    if image:
+        db.session.delete(image)
+        db.session.commit()
+        return jsonify(success=True), 200
+    else:
+        return jsonify(success=False, message="Image not found"), 404
+
 @main.route('/upload_targetfiles', methods=['POST'])
 @login_required
 def upload_targetfiles():
