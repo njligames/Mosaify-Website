@@ -250,6 +250,27 @@ def mosaify_previous(project_id):
 
     return redirect(url_for('main.mosaify'))
 
+@main.route('/delete_project/<int:project_id>', methods=['POST'])
+@login_required
+def delete_project(project_id):
+
+    project = Project.query.get(project_id)
+    if project:
+        all_tiles = MosaicTiles.query.filter_by(project_id=project_id).all()
+        for tile in all_tiles:
+            db.session.delete(tile)
+
+        all_targets = MosaicTargetImages.query.filter_by(project_id=project_id).all()
+        for target in all_targets:
+            db.session.delete(target)
+
+        db.session.commit()
+
+        db.session.delete(project)
+        db.session.commit()
+        return jsonify(success=True), 200
+    else:
+        return jsonify(success=False, message="Project not found"), 404
 
 @main.route('/mosaify_new')
 @login_required

@@ -3,6 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <title>Home</title>
+    <script>
+      function deleteProject(projectId) {
+        fetch(`/delete_project/${projectId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Remove the image from the gallery
+              document.getElementById(`project-${projectId}`).remove();
+            } else {
+              alert(data.message);
+            }
+          });
+      }
+    </script>
   </head>
   <body>
     <h1>Welcome, {{ current_user.username }}!</h1>
@@ -11,9 +30,12 @@
     <ul>
       {% for project in projects %}
       <li>
-        <a href="{{ url_for('main.mosaify_previous', project_id=project) }}"
-          >Project {{project}}</a
-        ><br />
+        <div id="project-{{ project }}">
+          <a href="{{ url_for('main.mosaify_previous', project_id=project) }}"
+            >Project {{project}}</a
+          >
+          <button onclick="deleteProject({{ project }})">Delete</button>
+        </div>
       </li>
       {% endfor %}
     </ul>
