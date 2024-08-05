@@ -74,7 +74,7 @@ def logout():
 @login_required
 def home():
     all_projects = Project.query.filter_by(user_id=current_user.id).all()
-    projects = [proj.id for proj in all_projects]
+    projects = [proj for proj in all_projects]
     return render_template('home.html', projects=projects)
 
 @main.route('/')

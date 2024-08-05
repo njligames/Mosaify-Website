@@ -21,6 +21,7 @@ class Project(db.Model):
     mosaic_target_images  = db.relationship('MosaicTargetImages', backref='project', lazy=True)
     mosaic_preview_images = db.relationship('MosaicPreviewImages', backref='project', lazy=True)
     mosaic                = db.relationship('Mosaic', backref='project', lazy=True)
+    name                  = db.Column(db.String, nullable=False, default='Default Project Name')
 
 # This will hold all of the tiles that will be used to create a mosaic.
 class MosaicTiles(db.Model):

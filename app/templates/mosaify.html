@@ -202,6 +202,7 @@
       <h1>Welcome, {{ current_user.username }}!</h1>
       {% if current_project %}
       <h2>Current Project ID: {{ current_project.id }}</h2>
+      <h2>Current Project Name: {{ current_project.name }}</h2>
       {% else %}
       <h2>No current project selected.</h2>
       {% endif %}
