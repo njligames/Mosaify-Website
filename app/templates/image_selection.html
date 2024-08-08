@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Select Area on Image</title>
+    <style>
+      .canvas-container {
+        position: relative;
+        display: inline-block;
+      }
+      .selection-rectangle {
+        position: absolute;
+        border: 2px dashed #000;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Select a Square on the Image</h1>
+    <div class="canvas-container">
+      <!-- <img id="image" src="https://files.worldwildlife.org/wwfcmsprod/images/HERO_Chimpanzee_Uganda/hero_small/5ww9mfzphi_Medium_WW215321.jpg" alt="Image" style="max-width: 100%;"> -->
+      <img
+        id="image"
+        src="{{ url_for('main.uploaded_tile_file_preview', id=file) }}"
+        alt="{{ file }}"
+        style="max-width: 100%"
+      />
+      <div id="selection" class="selection-rectangle"></div>
+    </div>
+    <button onclick="sendSelection()">Submit Selection</button>
+    <a href="{{ url_for('main.list_files') }}">List uploaded files</a>
+    <a href="{{ url_for('main.mosaify') }}">Back to upload</a>
+
+    <script>
+      const image = document.getElementById("image");
+      const selection = document.getElementById("selection");
+      let startX, startY, endX, endY;
+
+      image.addEventListener("load", () => {
+        const rect = image.getBoundingClientRect();
+        selection.style.left = "{{ x }}px";
+        selection.style.top = "{{ y }}px";
+        selection.style.width = "{{ width }}px";
+        selection.style.height = "{{ height }}px";
+      });
+
+      image.addEventListener("mousedown", (e) => {
+        const rect = image.getBoundingClientRect();
+        startX = Math.max(0, e.clientX - rect.left);
+        startY = Math.max(0, e.clientY - rect.top);
+        selection.style.left = startX + "px";
+        selection.style.top = startY + "px";
+        selection.style.width = "0px";
+        selection.style.height = "0px";
+        selection.style.display = "block";
+
+        function onMouseMove(e) {
+          endX = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
+          endY = Math.min(rect.height, Math.max(0, e.clientY - rect.top));
+          const width = endX - startX;
+          const height = endY - startY;
+          selection.style.width = Math.abs(width) + "px";
+          selection.style.height = Math.abs(height) + "px";
+          selection.style.left = width < 0 ? endX + "px" : startX + "px";
+          selection.style.top = height < 0 ? endY + "px" : startY + "px";
+        }
+
+        function onMouseUp() {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+
+      function sendSelection() {
+        const rect = selection.getBoundingClientRect();
+        const imgRect = image.getBoundingClientRect();
+        const x = rect.left - imgRect.left;
+        const y = rect.top - imgRect.top;
+        const width = rect.width;
+        const height = rect.height;
+        const _id = {{ file }}
+
+        fetch("/process_selection", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ x, y, width, height, _id }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Selection data:", data);
+          });
+      }
+    </script>
+  </body>
+</html>

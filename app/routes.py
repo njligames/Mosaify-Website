@@ -96,6 +96,51 @@ def list_files():
 
     return render_template('list.html', files=files)
 
+@main.route('/preview_tilefile/<id>')
+@login_required
+def preview_tilefile(id):
+    file_entry = MosaicTiles.query.filter_by(id=id).first()
+
+    if file_entry:
+        x = file_entry.x_roi 
+        y = file_entry.y_roi 
+        width = file_entry.width_roi 
+        height = file_entry.height_roi 
+
+        return render_template('image_selection.html', file=id, x=x, y=y, width=width, height=height)
+
+@main.route('/uploaded_tile_file_preview/<id>')
+@login_required
+def uploaded_tile_file_preview(id):
+    # print("preview_tilefile", str(id))
+    # Query the MosaicTiles table for the data where the filename matches
+    file_entry = MosaicTiles.query.filter_by(id=id).first()
+
+    if file_entry:
+
+        d = zlib.decompress(file_entry.data)
+        img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
+        img.save(file_path)
+
+        file_data = None
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+
+        os.remove(file_path)
+
+        if None != file_data:
+            mime_type = mimetypes.guess_type(file_entry.filename)[0]
+
+            if mime_type:
+                return send_file(io.BytesIO(file_data), mimetype=mime_type, as_attachment=True, download_name=file_entry.filename)
+            else:
+                abort(400, description="MIME type could not be determined.")
+    else:
+        abort(404, description="File not found.")
+
+    return 'File not found', 404
+
 @main.route('/tile_uploads/<id>')
 @login_required
 def uploaded_tile_file(id):
@@ -107,7 +152,15 @@ def uploaded_tile_file(id):
         d = zlib.decompress(file_entry.data)
         img = Image.frombytes("RGB", (file_entry.rows, file_entry.cols), d)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], file_entry.filename)
-        img.save(file_path)
+
+        left = file_entry.x_roi
+        upper = file_entry.y_roi
+        right = file_entry.x_roi + file_entry.width_roi
+        lower = file_entry.y_roi + file_entry.height_roi
+
+        cropped_img = img.crop((left, upper, right, lower))
+
+        cropped_img.save(file_path)
 
         file_data = None
         with open(file_path, 'rb') as f:
@@ -314,6 +367,15 @@ def upload_tilefiles():
                     rows, cols = im.size
                     comps = 3
 
+                    imageWidth = rows
+                    imageHeight = cols
+
+                    width = min(imageWidth, imageHeight)
+                    height = min(imageWidth, imageHeight)
+                    x = (imageWidth - width) / 2
+                    y = (imageHeight - height) / 2
+
+
                     current_project_id = session['current_project_id']
 
                     new_file = MosaicTiles(
@@ -323,7 +385,11 @@ def upload_tilefiles():
                         data=zlib.compress(data),
                         rows=rows,
                         cols=cols,
-                        comps=comps
+                        comps=comps,
+                        x_roi=x,
+                        y_roi=y,
+                        width_roi=width,
+                        height_roi=height
                     )
 
                     # Add the new file to the session and commit
@@ -401,6 +467,44 @@ def load_current_project():
     else:
         g.current_project = None
 
+
+@main.route('/process_selection', methods=['POST'])
+@login_required
+def process_selection():
+    data = request.json
+    new_x_roi = data['x']
+    new_y_roi = data['y']
+    new_width_roi = data['width']
+    new_height_roi = data['height']
+    tile_id = data['_id']
+
+
+     # Find the corresponding tile in the database
+    tile = MosaicTiles.query.filter_by(id=tile_id, user_id=current_user.id).first()
+
+    if tile is None:
+        flash('Tile not found or access denied.', 'danger')
+        return redirect(url_for('main.mosaify'))
+
+    # Update the ROI values
+    tile.x_roi = new_x_roi
+    tile.y_roi = new_y_roi
+    tile.width_roi = new_width_roi
+    tile.height_roi = new_height_roi
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    flash('Tile ROI updated successfully!', 'success')
+    # return redirect(url_for('main.mosaify'))
+
+
+    # print("process_selection", x, y, width, height, _id)
+
+    # Process the coordinates and dimensions as needed
+    # For demonstration, we just return them back
+    return jsonify({'x': new_x_roi, 'y': new_y_roi, 'width': new_width_roi, 'height': new_height_roi})
+
 # @main.route('/mosaify_run')
 @main.route('/mosaify_run', methods=['GET'])
 @login_required
@@ -439,16 +543,17 @@ def mosaify_run():
     target_files.append(my_target.id)
     current_app.logger.debug('10')
 
-    queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps).filter_by(project_id=current_project_id).all()
+    queried_data = MosaicTiles.query.with_entities(MosaicTiles.id, MosaicTiles.filename, MosaicTiles.data, MosaicTiles.rows, MosaicTiles.cols, MosaicTiles.comps, MosaicTiles.x_roi, MosaicTiles.y_roi, MosaicTiles.width_roi, MosaicTiles.height_roi).filter_by(project_id=current_project_id).all()
     current_app.logger.debug('11')
 
     mosaify = MosaifyPy()
     current_app.logger.debug('12')
     mosaify.setTileSize(8)
     current_app.logger.debug('13')
-    for id, filename, data, rows, cols, comps in queried_data:
+    for id, filename, data, rows, cols, comps, x_roi, y_roi, width_roi, height_roi in queried_data:
         d = zlib.decompress(data)
         mosaify.addTileImage(cols, rows, comps, d, filename, id)
+        mosaify.updateTileROI(x_roi, y_roi, width_roi, height_roi, id)
     current_app.logger.debug('14')
 
 

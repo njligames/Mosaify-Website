@@ -33,6 +33,10 @@ class MosaicTiles(db.Model):
     cols = db.Column(db.Integer, nullable=False)
     comps = db.Column(db.Integer, nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
+    x_roi = db.Column(db.Integer, nullable=False)
+    y_roi = db.Column(db.Integer, nullable=False)
+    width_roi = db.Column(db.Integer, nullable=False)
+    height_roi = db.Column(db.Integer, nullable=False)
 
 # This will hold the mosaic target images.
 class MosaicTargetImages(db.Model):

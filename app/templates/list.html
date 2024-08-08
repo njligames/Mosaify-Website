@@ -29,11 +29,14 @@
         {% for file in files %}
         <li>
           <div id="file-{{ file }}">
-            <img
-              src="{{ url_for('main.uploaded_tile_file', id=file) }}"
-              alt="{{ file }}"
-              style="max-width: 200px"
-            />
+            <a href="{{ url_for('main.preview_tilefile', id=file) }}">
+              <img
+                src="{{ url_for('main.uploaded_tile_file', id=file) }}"
+                alt="{{ file }}"
+                style="max-width: 200px"
+              />
+            </a>
+
             <p>{{ file }}</p>
             <button onclick="deleteImage({{ file }})">Delete</button>
           </div>
