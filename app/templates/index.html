@@ -1,12 +1,35 @@
+<!-- /*
+* Template Name: Snap
+* Template Author: Untree.co
+* Tempalte URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <title>Home</title>
+    {% include 'pre.html' %}
   </head>
   <body>
-    <h1>Welcome to Mosaify!</h1>
-    <a href="{{ url_for('main.login') }}">Login</a>
-    <a href="{{ url_for('main.register') }}">Register</a>
+    <main>
+      <section
+        class="site-section-hero bg-image mb-5"
+        style="background-image: url('{{ url_for('static', filename='images/hero-min.jpg')}}');"
+        data-stellar-background-ratio="0.5"
+        id="section-home"
+      >
+        <div class="row justify-content-center align-items-center">
+          <div class="col-md-7 text-center">
+            <h1 class="heading text-uppercase text-white" data-aos="fade-up">
+              Mosaify
+            </h1>
+            <h2>Welcome to Mosaify!</h2>
+            <a href="{{ url_for('main.login') }}">Login</a>
+            <a href="{{ url_for('main.register') }}">Register</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    {% include 'post.html' %}
   </body>
 </html>
