@@ -32,69 +32,91 @@
     <a href="{{ url_for('main.mosaify') }}">Back to upload</a>
 
     <script>
-      const image = document.getElementById("image");
-      const selection = document.getElementById("selection");
-      let startX, startY, endX, endY;
+      function disableDragAndDrop() {
+        document.addEventListener("dragstart", function (event) {
+          event.preventDefault();
+        });
 
-      image.addEventListener("load", () => {
-        const rect = image.getBoundingClientRect();
-        selection.style.left = "{{ x }}px";
-        selection.style.top = "{{ y }}px";
-        selection.style.width = "{{ width }}px";
-        selection.style.height = "{{ height }}px";
-      });
-
-      image.addEventListener("mousedown", (e) => {
-        const rect = image.getBoundingClientRect();
-        startX = Math.max(0, e.clientX - rect.left);
-        startY = Math.max(0, e.clientY - rect.top);
-        selection.style.left = startX + "px";
-        selection.style.top = startY + "px";
-        selection.style.width = "0px";
-        selection.style.height = "0px";
-        selection.style.display = "block";
-
-        function onMouseMove(e) {
-          endX = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
-          endY = Math.min(rect.height, Math.max(0, e.clientY - rect.top));
-          const width = endX - startX;
-          const height = endY - startY;
-          selection.style.width = Math.abs(width) + "px";
-          selection.style.height = Math.abs(height) + "px";
-          selection.style.left = width < 0 ? endX + "px" : startX + "px";
-          selection.style.top = height < 0 ? endY + "px" : startY + "px";
-        }
-
-        function onMouseUp() {
-          document.removeEventListener("mousemove", onMouseMove);
-          document.removeEventListener("mouseup", onMouseUp);
-        }
-
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
-      });
-
-      function sendSelection() {
-        const rect = selection.getBoundingClientRect();
-        const imgRect = image.getBoundingClientRect();
-        const x = rect.left - imgRect.left;
-        const y = rect.top - imgRect.top;
-        const width = rect.width;
-        const height = rect.height;
-        const _id = {{ file }}
-
-        fetch("/process_selection", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ x, y, width, height, _id }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Selection data:", data);
-          });
+        document.addEventListener("drop", function (event) {
+          event.preventDefault();
+        });
       }
+
+      // Call the function to disable drag and drop
+      disableDragAndDrop();
+    </script>
+    <script>
+        const image = document.getElementById("image");
+        const selection = document.getElementById("selection");
+        let startX, startY, endX, endY;
+
+        image.addEventListener("load", () => {
+          const rect = image.getBoundingClientRect();
+          selection.style.left = "{{ x }}px";
+          selection.style.top = "{{ y }}px";
+          selection.style.width = "{{ width }}px";
+          selection.style.height = "{{ height }}px";
+        });
+
+        image.addEventListener("mousedown", (e) => {
+          const rect = image.getBoundingClientRect();
+          const startX = Math.max(0, e.clientX - rect.left);
+          const startY = Math.max(0, e.clientY - rect.top);
+          selection.style.left = startX + "px";
+          selection.style.top = startY + "px";
+          selection.style.width = "0px";
+          selection.style.height = "0px";
+          selection.style.display = "block";
+
+          function onMouseMove(e) {
+              const endX = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
+              const endY = Math.min(rect.height, Math.max(0, e.clientY - rect.top));
+
+              // Calculate width and height based on mouse movement
+              let width = endX - startX;
+              let height = endY - startY;
+
+              // Ensure that width and height form a perfect square
+              const size = Math.min(Math.abs(width), Math.abs(height));
+              width = size * Math.sign(width);
+              height = size * Math.sign(height);
+
+              selection.style.width = Math.abs(width) + "px";
+              selection.style.height = Math.abs(height) + "px";
+              selection.style.left = width < 0 ? startX + width + "px" : startX + "px";
+              selection.style.top = height < 0 ? startY + height + "px" : startY + "px";
+          }
+
+          function onMouseUp() {
+              document.removeEventListener("mousemove", onMouseMove);
+              document.removeEventListener("mouseup", onMouseUp);
+          }
+
+          document.addEventListener("mousemove", onMouseMove);
+          document.addEventListener("mouseup", onMouseUp);
+      });
+
+        function sendSelection() {
+          const rect = selection.getBoundingClientRect();
+          const imgRect = image.getBoundingClientRect();
+          const x = rect.left - imgRect.left;
+          const y = rect.top - imgRect.top;
+          const width = rect.width;
+          const height = rect.height;
+          const _id = {{ file }}
+
+          fetch("/process_selection", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ x, y, width, height, _id }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Selection data:", data);
+            });
+        }
     </script>
   </body>
 </html>
